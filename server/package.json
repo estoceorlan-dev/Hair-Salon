@@ -9,7 +9,15 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test tests/foundation.test.js tests/database-tools.test.js",
+    "test:db": "node --test tests/database.integration.test.js",
+    "db:local:setup": "node scripts/local-postgres.js setup",
+    "db:local:start": "node scripts/local-postgres.js start",
+    "db:local:stop": "node scripts/local-postgres.js stop",
+    "db:migrate": "node scripts/database.js migrate",
+    "db:status": "node scripts/database.js status",
+    "db:seed:demo": "node scripts/database.js seed-demo",
+    "db:reset:demo": "node scripts/database.js reset-demo"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

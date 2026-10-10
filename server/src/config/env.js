@@ -7,6 +7,18 @@ const optionalText = z
   .trim()
   .optional()
   .transform((value) => value || undefined)
+const databaseUrl = optionalText.refine((value) => {
+  if (!value) return true
+  try {
+    const url = new URL(value)
+    return (
+      ['postgres:', 'postgresql:'].includes(url.protocol) &&
+      Boolean(url.hostname)
+    )
+  } catch {
+    return false
+  }
+}, 'Use a PostgreSQL connection URL or leave empty')
 const environmentSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
@@ -31,18 +43,9 @@ const environmentSchema = z.object({
         return false
       }
     }, 'Use a valid IANA timezone'),
-  DATABASE_URL: optionalText.refine((value) => {
-    if (!value) return true
-    try {
-      const url = new URL(value)
-      return (
-        ['postgres:', 'postgresql:'].includes(url.protocol) &&
-        Boolean(url.hostname)
-      )
-    } catch {
-      return false
-    }
-  }, 'Use a PostgreSQL connection URL or leave empty'),
+  DATABASE_URL: databaseUrl,
+  DEMO_DATABASE_URL: databaseUrl,
+  TEST_DATABASE_URL: databaseUrl,
   DB_CONNECTION_TIMEOUT_MS: z.coerce
     .number()
     .int()
@@ -72,6 +75,8 @@ export function parseEnvironment(environment) {
     appOrigin: value.APP_ORIGIN,
     timezone: value.APP_TIMEZONE,
     databaseUrl: value.DATABASE_URL,
+    demoDatabaseUrl: value.DEMO_DATABASE_URL,
+    testDatabaseUrl: value.TEST_DATABASE_URL,
     dbConnectionTimeoutMs: value.DB_CONNECTION_TIMEOUT_MS,
     jwtSecret: value.JWT_SECRET,
   }

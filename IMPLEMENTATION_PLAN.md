@@ -4,7 +4,7 @@
 
 **Optional milestone:** deploy the verified application to Render after the local presentation.
 
-**Status:** Phases 0 and 1 implemented; Phase 0 business definitions remain placeholders by request. Phases 2-11 remain planned.
+**Status:** Phases 0-2 implemented; business definitions remain placeholders by request. Phases 3-11 remain planned. Payment options remain disabled/display-only.
 
 **Prepared:** October 10, 2026, Asia/Manila.
 
@@ -28,7 +28,7 @@ This plan follows [ARCHITECTURE.md](ARCHITECTURE.md), the business requirements 
 
 - Use **React + Vite + Express + PostgreSQL**, as specified by the architecture and existing code. The earlier Flutter recommendation in `reqs.txt` is superseded for this implementation.
 - Implement manager, receptionist/cashier, stylist/beautician, and customer permissions. A customer account is separate from an employee account; walk-in customer records do not require login accounts.
-- Use PHP currency and `Asia/Manila` business dates. Default opening hours are Monday-Saturday, 9:00 AM-7:00 PM, with configurable closures and staff schedules.
+- Use PHP currency and `Asia/Manila` business dates. Demo hours illustrate Monday-Saturday, 9:00 AM-7:00 PM; final hours, closures, and staff schedule policies remain TBD.
 - Current payment scope: show disabled Cash, GCash, Maya, and Card options only. Payment processing, manual verification, provider integration, and final payment policies are deferred until separately defined and implemented.
 - The prototype's unconditional 12% VAT has been removed. Tax/discount rules remain undefined (`null`) until confirmed; POS shows an estimated subtotal without claiming a finalized payable amount.
 - Keep base-pay, commission, adjustment, and pay-period definitions as placeholders. Agree the calculation before implementing payroll; attendance-driven pay and statutory deduction automation require separate requirements.
@@ -127,20 +127,22 @@ docs/
 
 **Goal:** create persistent storage that protects relationships and transaction integrity.
 
-- [ ] Create local development, demo, and test databases with a dedicated application database user.
-- [ ] Produce an ER diagram/data dictionary and numbered, version-tracked migrations. A fresh database must be reproducible without manual table edits.
-- [ ] Model users, employee profiles, customer profiles, roles/permissions, services, staff-service eligibility, business hours, and settings.
-- [ ] Model appointments with customer, service, assigned staff, start/end timestamps, status, and booking reference.
-- [ ] Model products, service-product consumption rules, stock balances, and append-only inventory movements with actor, reason, and source reference.
-- [ ] Model sales, sale items, staff attribution, payments, receipt numbers, refunds/voids, and unique checkout idempotency keys.
-- [ ] Model commission entries, payroll runs/items, pay-period approval/payment status, notifications, and activity logs.
-- [ ] Use foreign keys, uniqueness, check constraints, and indexes for date/staff/customer searches. Protect staff time ranges against overlapping active appointments at database level.
-- [ ] Use fixed-precision money or integer centavos, explicit decimal stock units, and server-side rounding. Store timestamps consistently and group reports by Manila business dates.
-- [ ] Preserve price, duration, consumption, and commission snapshots where needed so later catalog edits do not rewrite history. Deactivate referenced records instead of deleting them.
-- [ ] Add deterministic demo data: accounts for each role, customers, staff, services, products, historical sales, appointments, low stock, and an open payroll period.
-- [ ] Separate repeatable demo reset/seed tools from non-destructive production migrations. Make demo reset refuse to run outside the designated demo database.
+- [x] Create `romel_salon_dev`, `romel_salon_demo`, and `romel_salon_test` in a workspace PostgreSQL 18.3 cluster on loopback port 5433, owned by the dedicated non-superuser `romel_app` role.
+- [x] Document the ER diagram/data dictionary in `docs/database-model.md`; implement three numbered, transactionally applied, checksum-tracked migrations.
+- [x] Model users, employees, customers, roles/permissions, services, eligibility, availability, business hours, closures, and settings. Policy values remain nullable/placeholders; no permissions are granted yet.
+- [x] Model appointments with customer/staff/service relationships, timestamps, statuses, references, and catalog snapshots.
+- [x] Model products, nullable consumption definitions, balances, and append-only stock movements. Explicit movements update balances atomically without choosing service consumption timing.
+- [x] Model sales/items/staff, payment labels/records, receipt/idempotency keys, refunds, and voids. All payment methods remain disabled; no checkout/provider API is enabled.
+- [x] Model pending-definition commissions, payroll runs/items/allocations/payouts, notifications, and append-only activity history.
+- [x] Add FKs, check/unique constraints, indexes, a staff-time exclusion constraint, and cross-employee payroll allocation protection.
+- [x] Store centavo money in BIGINT, stock in NUMERIC(14,3), instants in TIMESTAMPTZ, and date-only periods in DATE. Financial/report calculation policies remain future work.
+- [x] Add name/price/duration/consumption/commission snapshot storage and protect finalized sale item edits; retain active flags and restrictive FKs for master records.
+- [x] Load repeatable fictitious demo accounts and operational/history fixtures, a low-stock example, and a draft payroll period. Tax/commission/payroll/consumption definitions remain unset; account passwords stay in ignored local files.
+- [x] Implement separate migration, seed, and explicit-confirmation reset commands with production/remote/name/identity guards; verify seed repetition and demo reset/reseed.
 
 **Exit criterion:** migrations create a fresh database, demo data loads repeatably, and invalid relationships/duplicate bookings are rejected.
+
+**Verification:** three fresh databases each have 34 application tables and three tracked migrations. Eleven API/tool tests and eight real PostgreSQL scenarios pass, covering migration rollback/checksum refusal, seed idempotency, invalid FKs/keys, concurrent booking/stock conflicts, historical snapshots, payroll allocation ownership, and readiness. The live Vite-proxied API returns 200 readiness; payment requests still return 501. Lint and build pass. UI/business API integration remains in later phases.
 
 ## Phase 3 - Authentication and Role Access
 
@@ -258,15 +260,15 @@ docs/
 
 ### Scripts to implement
 
-Phase 1 added `dev:server`, `dev:all`, `start`, and `test` alongside the existing frontend scripts. Database migration and seed scripts remain **planned for Phase 2** and must exist before using the full presentation runbook below:
+Phases 1-2 added development/start/test and database migration/seed/reset scripts alongside the existing frontend scripts. The full presentation runbook below remains for Phase 10, after business workflows are implemented:
 
 | Root script | Planned behavior |
 | --- | --- |
 | `dev:server` | Run the Express backend in watch mode via `server/package.json` |
 | `dev:all` | Start Vite and the backend together with coordinated shutdown |
 | `start` | Run `npm --prefix server start`; backend serves `dist/` and the API |
-| `db:migrate` | Run versioned backend migrations against the configured database |
-| `db:seed:demo` | Load demo fixtures with safeguards against production use |
+| `db:migrate` | Implemented: run versioned backend migrations against the selected database |
+| `db:seed:demo` | Implemented: load only the dedicated marked local demo fixtures |
 | `test` | Run the critical automated business/API tests |
 
 ### First-time presentation setup

@@ -10,7 +10,7 @@ try {
     console.info(`Romel API listening at http://${config.host}:${config.port}`)
     if (!config.databaseUrl)
       console.info(
-        'Database connection pending Phase 2; /api/health returns 503 until configured.',
+        'Database connection is not configured; run npm run db:local:setup. /api/health returns 503 until connected.',
       )
   })
   server.on('error', async (error) => {

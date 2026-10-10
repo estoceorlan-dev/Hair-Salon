@@ -6,12 +6,12 @@
 2. Choose **Preview employee workspace**. The entry screen intentionally collects no credentials.
 3. Review the existing sample Dashboard, Appointments, and Inventory screens.
 4. Navigate Customers, Services, Employees, Payroll, Reports, and Activity Logs. Each has its own placeholder URL/page.
-5. Open Settings. Expected with no database credentials: the API is connected and data storage is pending.
+5. Open Settings. After `db:local:setup`, the API and data storage should report connected; screens still show preview records.
 6. Open POS, search/add sample items, and review the estimated subtotal. Tax remains undefined. Cash, GCash, Maya, card, and the payment action are disabled.
 7. Reload `/app/pos` to verify routing. The preview mode survives in this browser tab; the sample cart is intentionally not saved.
 8. Exit the preview, then choose **Preview customer booking**. Select sample service/date/time and review the selection. The screen explicitly confirms nothing has been reserved or saved.
 
-No real accounts, payments, receipts, reservations, inventory updates, or payroll calculations are demonstrated yet. Request logs describe API traffic; they are not business activity logs.
+No real sign-in, payments, receipts, reservations, operational inventory updates, or payroll calculations are demonstrated yet. PostgreSQL holds separate fictitious fixtures and hashed-password demo accounts for later integration. Request logs describe API traffic; they are not the database business event workflow.
 
 ## Later persisted presentation (Phases 2-10)
 

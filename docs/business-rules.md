@@ -7,7 +7,7 @@ The user requested that definitions remain placeholders for now. The entries bel
 - Use React/Vite + Express + PostgreSQL; retain custom CSS for the foundation.
 - Use PHP display currency and `Asia/Manila` as the project's date/time context.
 - Keep GCash, Maya, and card visible but disabled. Do not collect payment details, generate QR/payment links, verify transactions, or claim payment success.
-- Keep cash checkout pending as well; the current milestone implements no sale/payment records.
+- Keep cash checkout pending as well. Phase 2 includes only explicitly fictitious historical cash records for future report tests; no live sale/payment workflow is enabled.
 - Set undecided numeric/policy values to `null`, not invented rates. `src/config/business-rules.js` is a UI placeholder, not the future authoritative pricing engine.
 - The API must report actual database readiness; UI sample access must not be presented as secure login or saved booking.
 

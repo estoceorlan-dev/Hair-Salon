@@ -1,7 +1,7 @@
 # Romel Hair Salon Management System
 ## System Architecture Documentation
 
-> Phase 0/1 implementation: the React/Express foundation is available, while business definitions remain placeholders. The current UI uses sample records and preview access. PostgreSQL schema and real authentication are later phases. Cash, GCash, Maya, and card are display-only, disabled options; no payment processing is implemented. See [requirements](docs/requirements.md) and [business-rule placeholders](docs/business-rules.md).
+> Phases 0-2 implementation: the React/Express foundation and PostgreSQL schema/migrations/fixtures are available, while business definitions remain placeholders. The UI still uses sample records and preview access; real authentication and business API integration are later phases. Cash, GCash, Maya, and card remain display-only disabled options. Historical cash database fixtures do not process payments. See [database model](docs/database-model.md), [requirements](docs/requirements.md), and [business-rule placeholders](docs/business-rules.md).
 
 ## 1. Project Overview
 

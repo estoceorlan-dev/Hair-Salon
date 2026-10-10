@@ -2,16 +2,16 @@
 
 ## Delivery agreement
 
-Implement Phases 0 and 1 first: document the scope and build the application foundation. Business definitions remain placeholders at the user's request. Existing records, prices, stock, statistics, and time slots are sample UI data. Database schema, authentication, saved bookings, checkout, and provider integrations belong to later phases.
+Phases 0-2 document the scope, build the application foundation, and create PostgreSQL storage/migrations/fixtures. Business definitions remain placeholders at the user's request. Screens, prices, statistics, and time slots are sample UI data; PostgreSQL also has separate fictitious fixtures for later work. Authentication, business API integration, checkout, and providers belong to later phases.
 
-GCash, Maya, and card appear in POS but are disabled and display-only. Cash checkout is also pending. There are no payment SDKs, QR codes, payment links, credentials, card-detail fields, manual verification, or payment recording in this milestone.
+GCash, Maya, and card appear in POS but are disabled and display-only. Cash checkout is also pending. There are no provider SDKs, QR codes, payment links, provider credentials, card-detail fields, or payment recording endpoints. Synthetic historical cash records are database fixtures only.
 
 ## Technology decisions
 
 - Frontend: retain React + Vite and Lucide; use React Router for routes and Axios with relative `/api` requests.
 - Styling: retain the existing custom CSS and color palette. Tailwind in the original architecture is deferred; a rewrite is not required.
 - Backend: Node + Express REST API with configuration, validation, safe errors, request logging, and a PostgreSQL pool.
-- Persistence: PostgreSQL 18 is installed locally. Application credentials, databases, migrations, and seeds are Phase 2 work. The API can run without credentials, with readiness reporting 503.
+- Persistence: PostgreSQL 18.3 workspace cluster on port 5433; dedicated dev/demo/test databases, generated credentials, versioned migrations, and guarded fixtures/reset are implemented. Readiness is 200 when connected, 503 otherwise.
 - Authentication: JWT/bcrypt/cookie/rate-limit dependencies are installed for Phase 3. Current access selection is a UI preview, not verified identity or authorization.
 - Deployment: localhost first. Render remains an optional future phase. PHP currency and `Asia/Manila` display dates are the project defaults.
 
@@ -52,4 +52,4 @@ Use simple, responsive screens; enforce identity/role/ownership at the API; pres
 
 ## Excluded from this milestone
 
-Provider payments, saved sales/receipts, business database migrations, real authentication, automatic inventory changes, payroll calculation, public booking, email/SMS, loyalty campaigns, and cloud deployment.
+Provider payments, business booking/checkout endpoints, real authentication, automatic consumption at service/checkout, payroll calculation, public booking, email/SMS, loyalty campaigns, and cloud deployment. Phase 2 does atomically maintain stock when an explicit movement is inserted; it does not choose or implement a service consumption policy.
