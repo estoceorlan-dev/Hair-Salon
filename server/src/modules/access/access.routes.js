@@ -4,6 +4,7 @@ import { HttpError } from '../../middleware/errors.js'
 import { validate } from '../../middleware/validate.js'
 import { idSchema } from '../auth/auth.schemas.js'
 import { paymentRoutes } from '../payments/payments.routes.js'
+import { listSchema } from '../management/management.schemas.js'
 
 export function accessRoutes(service, database, config) {
   const router = Router()
@@ -36,21 +37,23 @@ export function accessRoutes(service, database, config) {
       JOIN salon.sale_items si ON si.id=ce.sale_item_id WHERE ce.employee_id=$1 ORDER BY ce.created_at DESC,ce.id LIMIT 100`, [req.auth.user.employeeId])
     res.json({ earnings: rows, definitionState: 'placeholder' })
   })
-  const history = async (customerId) => (await database.pool.query(`SELECT s.id,s.receipt_number,s.sold_at,s.status,s.total_cents,
+  const history = async (customerId, page = 1, pageSize = 100) => (await database.pool.query(`SELECT s.id,s.receipt_number,s.sold_at,s.status,s.total_cents,
     COALESCE((SELECT jsonb_agg(jsonb_build_object('name',i.description_snapshot,'quantity',i.quantity,'lineTotalCents',i.line_total_cents::text) ORDER BY i.id)
       FROM salon.sale_items i WHERE i.sale_id=s.id),'[]'::jsonb) AS items
-    FROM salon.sales s WHERE s.customer_id=$1 AND s.status='paid' ORDER BY s.sold_at DESC,s.id LIMIT 100`, [customerId])).rows
+    FROM salon.sales s WHERE s.customer_id=$1 AND s.status='paid' ORDER BY s.sold_at DESC,s.id LIMIT $2 OFFSET $3`, [customerId, pageSize, (page - 1) * pageSize])).rows
   router.get('/me/history', requirePermission('history.own'), async (req, res) => {
     if (!req.auth.user.customerId) throw new HttpError(403, 'FORBIDDEN', 'A customer profile is required.')
     res.json({ history: await history(req.auth.user.customerId) })
   })
-  router.get('/customers/:id/history', requirePermission('customers.manage', 'history.own'), validate(idSchema, 'params'), async (req, res) => {
+  router.get('/customers/:id/history', requirePermission('customers.manage', 'history.own'), validate(idSchema, 'params'), validate(listSchema, 'query'), async (req, res) => {
     const id = req.validated.params.id
     if (!req.auth.user.permissions.includes('customers.manage') && id !== req.auth.user.customerId)
       throw new HttpError(404, 'NOT_FOUND', 'Customer history not found.')
     const found = await database.pool.query('SELECT id FROM salon.customers WHERE id=$1', [id])
     if (!found.rowCount) throw new HttpError(404, 'NOT_FOUND', 'Customer history not found.')
-    res.json({ history: await history(id) })
+    const { page, pageSize } = req.validated.query
+    const count = (await database.pool.query("SELECT count(*)::int AS total FROM salon.sales WHERE customer_id=$1 AND status='paid'", [id])).rows[0].total
+    res.json({ history: await history(id, page, pageSize), total: count, page, pageSize })
   })
   router.use('/payments', requirePermission('sales.manage'), paymentRoutes())
   const futureModules = {

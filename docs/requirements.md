@@ -2,7 +2,7 @@
 
 ## Delivery agreement
 
-Phases 0-3 establish the scope, application/database foundation, verified sessions, registration, manager account controls, and role/ownership enforcement. Business definitions remain placeholders. Appointments, personal earnings, and customer history have scoped read APIs; dashboard figures, prices, and time slots remain sample UI data. Checkout, booking changes, and providers belong to later phases.
+Phases 0-4 establish the scope, application/database foundation, verified sessions, registration, account controls, role/ownership enforcement, and persisted customer/service/employee/settings management. Undefined business definitions remain placeholders. Appointments, personal earnings, and customer history have scoped read APIs. POS/customer choices use the database service catalog; dashboard figures remain samples. Simulated booking time slots have been removed. Checkout, booking changes, and providers belong to later phases. See [Phase 4 behavior](master-data.md).
 
 GCash, Maya, and card appear in POS but are disabled and display-only. Cash checkout is also pending. There are no provider SDKs, QR codes, payment links, provider credentials, card-detail fields, or payment recording endpoints. Synthetic historical cash records are database fixtures only.
 

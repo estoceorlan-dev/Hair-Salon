@@ -2,6 +2,8 @@
 
 The user requested that definitions remain placeholders for now. The entries below record what needs a decision; they do not assert final salon policy. Sample UI prices, statistics, stock levels, and time slots are illustrative.
 
+Phase 4 now provides editable configuration without choosing the missing definitions. Existing service demo values are labeled; new prices/durations, base pay and commissions may remain null. POS and customer choices share the database catalog, and the old simulated time slots have been removed. Managers can explicitly store demo/confirmed policy values for later implementation; no tax, commission or payroll calculation consumes them yet. Payment controls stay disabled. See [master-data behavior](master-data.md).
+
 ## Confirmed implementation constraints
 
 - Use React/Vite + Express + PostgreSQL; retain custom CSS for the foundation.

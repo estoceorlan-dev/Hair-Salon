@@ -4,7 +4,7 @@
 
 The application schema is `salon`; migration history is in `public.schema_migrations`. Local PostgreSQL 18.3 runs on loopback port 5433 using the installed binaries. An isolated workspace cluster contains `romel_salon_dev`, `romel_salon_demo`, and `romel_salon_test`, owned by the dedicated non-superuser `romel_app` role. Bootstrap administration uses a separate generated local role.
 
-The database now has 35 application tables and four migrations, including Phase 3 revocable sessions and conservative role grants. Authentication/account APIs and scoped appointment/earnings/history reads are implemented. Business writes, service consumption timing, final prices/taxes, commission/payroll rules, and payment providers remain future work. Synthetic historical cash fixtures are not actual payment processing.
+The database now has 35 application tables and five migrations, including revocable sessions, conservative role grants and Phase 4 employee contact/configuration additions. Authentication/account APIs, master-record/settings writes and scoped appointment/earnings/history reads are implemented. Service consumption timing, financial calculations, booking/checkout and payment providers remain future work. Synthetic historical cash fixtures are not actual payment processing. See [master-data contracts](master-data.md) for transactional audits, duplicate handling and availability validation.
 
 ## Entity relationships
 

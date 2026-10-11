@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, apiErrorMessage } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { EmptyState, Feedback, LoadingState } from '../components/ui/Feedback'
+import { Filters, Pager } from '../components/ui/Management'
 
 export default function EmployeeAccounts() {
   const auth = useAuth()
@@ -12,14 +13,17 @@ export default function EmployeeAccounts() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [revision, setRevision] = useState(0)
-  const loading = loadedRevision !== revision
+  const [query, setQuery] = useState({ q: '', status: 'all', page: 1 })
+  const [total, setTotal] = useState(0)
+  const requestKey = JSON.stringify(query) + revision
+  const loading = loadedRevision !== requestKey
   useEffect(() => {
     const controller = new AbortController()
-    api.get('/employee-accounts', { signal: controller.signal }).then(({ data }) => setEmployees(data.employees))
+    api.get('/employee-accounts', { signal: controller.signal, params: query }).then(({ data }) => { setEmployees(data.employees); setTotal(data.total) })
       .catch((err) => { if (!controller.signal.aborted) setError(apiErrorMessage(err)) })
-      .finally(() => { if (!controller.signal.aborted) setLoadedRevision(revision) })
+      .finally(() => { if (!controller.signal.aborted) setLoadedRevision(requestKey) })
     return () => controller.abort()
-  }, [revision])
+  }, [query, requestKey])
   const submit = async (event) => {
     event.preventDefault()
     setPending(true); setError(''); setSuccess('')
@@ -39,7 +43,7 @@ export default function EmployeeAccounts() {
     finally { setPending(false) }
   }
   return <div className="flex-col gap-4">
-    <Feedback>Manage sign-in accounts here. Pay, commission rules, and availability remain pending.</Feedback>
+    <Feedback>Manage sign-in accounts, roles and active status here. Pay inputs and schedules are under Profiles & availability.</Feedback>
     {error && <Feedback tone="error">{error}</Feedback>}{success && <Feedback tone="success">{success}</Feedback>}
     <section className="card"><h2>{selected ? 'Edit employee account' : 'Create employee account'}</h2>
       <form className="auth-form account-fields" onSubmit={submit} key={selected?.id || 'new-' + revision}>
@@ -54,11 +58,12 @@ export default function EmployeeAccounts() {
           {selected && <button type="button" className="btn btn-secondary" disabled={pending} onClick={() => setSelected(null)}>Cancel edit</button>}</div>
       </form><p className="text-muted text-sm">Passwords require at least 12 characters. Share the initial password privately; employees can change it under My Account.</p>
     </section>
-    <section className="card"><h2>Employee accounts</h2>{loading ? <LoadingState /> : !employees.length ? <EmptyState title="No accounts found" />
+    <section className="card"><h2>Employee accounts</h2><Filters query={query} setQuery={setQuery} />{loading ? <LoadingState /> : !employees.length ? <EmptyState title="No accounts found" />
       : <div className="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>
         {employees.map((employee) => <tr key={employee.id}><td>{employee.displayName}</td><td>{employee.email}</td><td>{employee.roleName}</td><td>{employee.isActive ? 'Active' : 'Inactive'}</td>
           <td><button className="btn btn-secondary" disabled={pending} onClick={() => { setSelected(employee); setError(''); setSuccess('') }}>Edit</button></td></tr>)}
       </tbody></table></div>}
+      <Pager page={query.page} total={total} onChange={(page) => setQuery({ ...query, page })} />
       <button className="btn btn-secondary mt-4" disabled={loading || pending} onClick={() => { setError(''); setRevision(revision + 1) }}>Refresh accounts</button>
     </section>
   </div>

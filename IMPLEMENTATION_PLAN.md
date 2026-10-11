@@ -4,7 +4,7 @@
 
 **Optional milestone:** deploy the verified application to Render after the local presentation.
 
-**Status:** Phases 0-3 implemented; business definitions remain placeholders by request. Phases 4-11 remain planned. Payment options remain disabled/display-only.
+**Status:** Phases 0-4 implemented; undefined business definitions remain placeholders by request. Phases 5-11 remain planned. Payment options remain disabled/display-only.
 
 **Prepared:** October 10, 2026, Asia/Manila.
 
@@ -164,14 +164,16 @@ docs/
 
 **Goal:** provide the records and configuration needed by bookings and checkout.
 
-- [ ] Build customer list/search/create/edit screens, contact details, preferred stylist, duplicate-handling rules, and a service-history view populated by completed transactions.
-- [ ] Build service catalog CRUD with categories, prices, durations, active status, and eligible staff. Use this same catalog in POS and customer booking.
-- [ ] Build employee profiles, roles, availability, active status, base-pay inputs, and commission rules.
-- [ ] Build manager-only settings for opening hours/closures, booking policy, receipt details, tax/discount behavior, enabled payment methods, and payroll periods.
-- [ ] Replace placeholder navigation with actual routes; add pagination/filtering and consistent form validation.
-- [ ] Record changes to sensitive settings and master records in the activity log.
+- [x] Build customer list/search/create/edit screens, contact details, preferred stylist, duplicate review with audited override reasons, and paginated history from completed paid transactions.
+- [x] Build service catalog create/read/update/deactivation with categories, nullable prices/durations, active status, and eligible staff. POS and the customer portal share this catalog.
+- [x] Build employee profiles, account roles/active controls, nonoverlapping availability, nullable base-pay inputs, and commission configuration; calculation remains deferred.
+- [x] Build manager-only hours/closures, booking policy, receipt details, tax/discount configuration, and payroll periods. Payment methods are displayed disabled by the existing scope decision; no enabling endpoint is exposed.
+- [x] Replace customer/service/settings placeholders with actual routes; add pagination/filtering and consistent server/form validation.
+- [x] Record master and sensitive-setting changes transactionally in the append-only activity log.
 
 **Exit criterion:** changes survive reload/server restart and immediately affect availability, POS choices, and role-appropriate screens.
+
+**Verification:** persisted records survive page reload and a new API instance. Six Phase 4 real-PostgreSQL scenarios cover authorization, duplicate/concurrent writes, catalog eligibility/deactivation, settings validation, audit and persistence. Headless Chrome checks cover all four management screens, customer history, POS/customer catalog reuse, pay/availability inputs, settings persistence and mobile layouts. Catalog choices and stored availability configuration reflect changes; actual slot calculation/reservations remain Phase 5. No undefined financial policy or payment processing is enabled. See [Phase 4 contracts and boundaries](docs/master-data.md).
 
 ## Phase 5 - Appointments and Customer Booking
 

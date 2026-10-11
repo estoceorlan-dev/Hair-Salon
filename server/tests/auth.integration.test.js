@@ -91,7 +91,7 @@ test('real PostgreSQL authentication, permissions, and ownership', async (t) => 
       assert.equal((await disabled.json()).error.code, 'PAYMENTS_NOT_IMPLEMENTED')
     }
     assert.equal((await request('/payments/maya', { ...sessions.customer, method: 'POST' })).status, 403)
-    assert.equal((await request('/settings', sessions.manager)).status, 501)
+    assert.equal((await request('/settings', sessions.manager)).status, 200)
     assert.equal((await request('/appointments', { ...sessions.customer, method: 'POST' })).status, 501)
   })
   let registered

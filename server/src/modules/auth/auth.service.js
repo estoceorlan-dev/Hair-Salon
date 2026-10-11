@@ -137,9 +137,15 @@ export function createAuthService(database, config) {
         await audit(client, auth.user.id, 'auth.password_changed', auth.user.id)
       })
     },
-    async employees() {
-      return (await pool().query(userSql + ` WHERE r.code<>'customer' ORDER BY lower(u.display_name)`))
-        .rows.map((row) => ({ ...publicUser(row), isActive: row.is_active && row.employee_active }))
+    async employees(query) {
+      const sql = userSql + ` WHERE r.code<>'customer' AND (u.display_name ILIKE $1 OR u.email ILIKE $1)
+        AND ($2='all' OR (u.is_active AND e.is_active)=($2='active'))`
+      const params = ['%' + query.q + '%', query.status]
+      const total = (await pool().query(`SELECT count(*)::int AS total FROM (${sql}) accounts`, params)).rows[0].total
+      const rows = (await pool().query(sql + ' ORDER BY lower(u.display_name),u.id LIMIT $3 OFFSET $4',
+        [...params, query.pageSize, (query.page - 1) * query.pageSize])).rows
+      return { employees: rows.map((row) => ({ ...publicUser(row), isActive: row.is_active && row.employee_active })),
+        total, page: query.page, pageSize: query.pageSize }
     },
     async createEmployee(actor, data) {
       const hash = await bcrypt.hash(data.password, 12)

@@ -10,7 +10,7 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "test": "node --test tests/foundation.test.js tests/database-tools.test.js tests/auth.test.js",
-    "test:db": "node --test --test-concurrency=1 tests/database.integration.test.js tests/auth.integration.test.js",
+    "test:db": "node --test --test-concurrency=1 tests/database.integration.test.js tests/auth.integration.test.js tests/management.integration.test.js",
     "auth:local:setup": "node scripts/local-auth.js",
     "db:local:setup": "node scripts/local-postgres.js setup",
     "db:local:start": "node scripts/local-postgres.js start",

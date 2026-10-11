@@ -11,6 +11,7 @@ import { parseEnvironment } from './config/env.js'
 import { createAuthService } from './modules/auth/auth.service.js'
 import { authRoutes, employeeAccountRoutes } from './modules/auth/auth.routes.js'
 import { accessRoutes } from './modules/access/access.routes.js'
+import { managementRoutes } from './modules/management/management.routes.js'
 
 export function createApp({
   database,
@@ -40,6 +41,12 @@ export function createApp({
   app.use('/api', healthRoutes(database))
   app.use('/api/auth', authRoutes(auth, config))
   app.use('/api/employee-accounts', employeeAccountRoutes(auth, config))
+  const management = managementRoutes(auth, database, config)
+  app.use('/api', (req, res, next) => {
+    if (['catalog', 'staff-options', 'customers', 'services', 'employee-profiles', 'availability', 'settings'].includes(req.path.split('/')[1]))
+      return management(req, res, next)
+    next()
+  })
   // Mount only known resource prefixes so unknown routes retain JSON 404 responses.
   const protectedApi = accessRoutes(auth, database, config)
   app.use('/api', (req, res, next) => {

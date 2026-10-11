@@ -1,4 +1,4 @@
-# Local Setup - Phases 0-3
+# Local Setup - Phases 0-4
 
 ## Prerequisites
 
@@ -62,7 +62,7 @@ Reset requires the exact name, loopback connection, matching database identity, 
 
 After local setup, readiness should be 200. To use an already configured PostgreSQL instance instead, privately set the three URLs in `server/.env`, create dedicated databases with the documented names, and migrate each target. Fresh migrations intentionally mark databases as production; only an explicitly designated demo/test database may have its `salon.database_identity.environment` changed to permit fixtures. Never relabel a real-data database to bypass the guard.
 
-Sign-in, registration, employee account controls, and scoped read-only appointments/earnings/history use PostgreSQL. Checkout and booking changes remain disabled; other business screens retain UI fixtures/placeholders.
+Sign-in, registration, employee account controls, scoped appointments/earnings/history, customer/service/employee profiles, availability and settings use PostgreSQL. Existing installations should run `npm run db:migrate` plus `npm run db:migrate -- --target=demo` for migration 005. Checkout and booking changes remain disabled; dashboard and inventory screens retain samples/placeholders.
 
 ## Build and serve the preview through Express
 

@@ -1,26 +1,20 @@
 import { useState } from 'react'
 import { ShoppingBag, Search, CreditCard } from 'lucide-react'
-import { EmptyState, Feedback } from './ui/Feedback'
+import { EmptyState, Feedback, LoadingState } from './ui/Feedback'
+import { useCatalog } from '../hooks/useCatalog'
 import { businessRules, formatCurrency } from '../config/business-rules'
 import { paymentMethods } from '../config/payment-methods'
 
-const items = [
-  { id: 1, name: "Men's Haircut", price: 250, category: 'Services' },
-  { id: 2, name: "Women's Haircut", price: 350, category: 'Services' },
-  { id: 3, name: 'Hair Coloring', price: 1500, category: 'Services' },
-  { id: 4, name: 'Rebond & Treatment', price: 3500, category: 'Services' },
-  { id: 5, name: 'Manicure & Pedicure', price: 500, category: 'Services' },
-  { id: 6, name: "L'Oreal Hair Serum", price: 850, category: 'Products' },
-  { id: 7, name: 'Keratin Shampoo', price: 450, category: 'Products' },
-]
-
 export default function POS() {
-  const [cart, setCart] = useState([])
-  const [activeCategory, setActiveCategory] = useState('Services')
+  const catalog = useCatalog()
+  const items = catalog.items.map((s) => ({ ...s, price: s.price_cents === null ? null : Number(s.price_cents) / 100 }))
+  const [cartIds, setCart] = useState([])
+  const cart = cartIds.flatMap((entry) => { const item = items.find((s) => s.id === entry.id && s.price !== null); return item ? [{ ...item, qty: entry.qty }] : [] })
+  const [activeCategory, setActiveCategory] = useState('')
   const [search, setSearch] = useState('')
   const filteredItems = items.filter(
     (item) =>
-      item.category === activeCategory &&
+      (!activeCategory || item.category === activeCategory) &&
       item.name.toLowerCase().includes(search.toLowerCase()),
   )
   const addToCart = (item) =>
@@ -42,14 +36,14 @@ export default function POS() {
     <div className="pos-layout">
       <section className="pos-catalog">
         <div className="pos-toolbar">
-          {['Services', 'Products'].map((category) => (
+          {['', ...new Set(items.map((s) => s.category))].map((category) => (
             <button
               type="button"
               key={category}
               className={`btn ${activeCategory === category ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveCategory(category)}
             >
-              {category}
+              {category || 'All services'}
             </button>
           ))}
           <div className="pos-search">
@@ -68,20 +62,23 @@ export default function POS() {
           </div>
         </div>
         <p className="text-muted text-sm">
-          Sample prices; final service and pricing rules will be configured
-          later.
+          Current service catalog. Demo entries are illustrative. Products and checkout will be connected in later phases.
         </p>
+        {catalog.loading && <LoadingState />}
+        {catalog.error && <Feedback tone="error">{catalog.error}</Feedback>}
+        <button className="btn btn-secondary mb-4" disabled={catalog.loading} onClick={catalog.refresh}>Refresh catalog</button>
         <div className="grid-cols-3">
           {filteredItems.map((item) => (
             <button
               type="button"
               key={item.id}
               className="card catalog-item"
+              disabled={item.price === null || catalog.loading || !!catalog.error}
               onClick={() => addToCart(item)}
             >
               <span className="font-bold">{item.name}</span>
               <span className="text-primary font-bold">
-                {formatCurrency(item.price)}
+                {item.price === null ? 'Price undefined' : formatCurrency(item.price)}{item.is_demo ? ' · Demo' : ''}
               </span>
             </button>
           ))}

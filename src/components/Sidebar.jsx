@@ -22,7 +22,7 @@ const navItems = [
   { name: 'Inventory', path: 'inventory', Icon: Package, permissions: ['inventory.manage'] },
   { name: 'Customers', path: 'customers', Icon: Users, permissions: ['customers.manage'] },
   { name: 'Services', path: 'services', Icon: Scissors, permissions: ['services.manage'] },
-  { name: 'Employee Accounts', path: 'employees', Icon: UserRound, permissions: ['employees.manage'] },
+  { name: 'Employees', path: 'employees', Icon: UserRound, permissions: ['employees.manage'] },
   { name: 'Payroll', path: 'payroll', Icon: Wallet, permissions: ['payroll.manage'] },
   { name: 'Reports', path: 'reports', Icon: ChartColumn, permissions: ['reports.view'] },
   { name: 'Activity Logs', path: 'activity-logs', Icon: History, permissions: ['logs.view'] },

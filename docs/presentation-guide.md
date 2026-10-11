@@ -1,4 +1,14 @@
-# Local Presentation Guide - Phases 0-3
+# Local Presentation Guide - Phases 0-4
+
+## Phase 4 walkthrough
+
+1. Apply migration 005, sign in as manager, and open Customers. Create a walk-in record, edit its preferred stylist/contact details, then reload to verify persistence. Search for it and inspect its initially empty history; seeded customers have fictitious completed transactions.
+2. Create a service with category, optional price/duration and eligible staff. Open POS to see the same record. Deactivate it in Services and refresh POS to confirm it disappears. Previous sales retain their item snapshots.
+3. Open Employees. Use Accounts & roles to create employees/change roles/status, then Profiles & availability to enter optional base pay/commission configuration and a Manila availability interval. Demonstrate overlap rejection.
+4. Open Settings to review hours, closures and policy definitions. Leave undecided policies undefined. Save receipt details or a closure and reload. All four payment methods remain disabled.
+5. Sign in as cashier to demonstrate customer maintenance and denied manager settings. Sign in as customer to see the shared active services/eligible staff and own history. No appointment is reserved by browsing these choices.
+
+The data edits above are real persisted records. Booking availability calculations, checkout, stock consumption and payroll calculations remain later milestones. See [Phase 4 details](master-data.md). Earlier phase walkthroughs below describe their historical checkpoint behavior.
 
 ## Current milestone
 

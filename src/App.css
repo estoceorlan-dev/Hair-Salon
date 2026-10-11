@@ -73,7 +73,8 @@
 .auth-form { display: flex; flex-direction: column; gap: 1rem; margin: 1.25rem 0; }
 .auth-switch { width: 100%; font-size: 0.875rem; }
 .account-card { width: 100%; max-width: 540px; }
-.account-fields { max-width: 600px; }
+.account-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 960px; }
+.account-fields > .flex, .account-fields > button { grid-column: 1 / -1; justify-self: start; }
 .records-card { margin-bottom: 1.5rem; }
 .records-card .table-container { margin-top: 1rem; }
 .salon-logo {
@@ -287,4 +288,32 @@
   .spinner {
     animation: none;
   }
+}
+
+.management-toolbar, .list-pagination { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.management-toolbar .input-group { flex: 1; min-width: 180px; }
+.list-pagination { align-items: center; }
+.list-pagination span { margin-right: auto; color: var(--text-muted); }
+.staff-checks { grid-column: 1 / -1; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; display: flex; gap: 1rem; flex-wrap: wrap; }
+.staff-checks legend { padding: 0 0.5rem; }
+.hours-row { display: grid; grid-template-columns: 100px repeat(4, minmax(120px, 1fr)); gap: 1rem; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+.period-fields { grid-column: 1 / -1; }
+.booking-service { display: flex; flex-direction: column; gap: 0.6rem; text-align: left; color: var(--text-main); }
+.booking-service.selected { outline: 2px solid var(--primary); background: #fff1f6; }
+.duplicate-review { margin: 1rem 0; }
+.duplicate-review button { margin: 0.25rem; }
+.customer-header { padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.customer-main { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+@media (max-width: 1100px) { .hours-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hours-row > strong { grid-column: 1 / -1; } }
+@media (max-width: 600px) {
+  .app-container { flex-direction: column; }
+  .sidebar { width: 100%; position: static; height: auto; }
+  .sidebar-navigation { display: flex; flex-direction: row; flex-wrap: wrap; flex: none; }
+  .sidebar-link { padding: 0.5rem; font-size: 0.8rem; }
+  .sidebar-brand { margin-bottom: 0.5rem; }
+  .main-content { margin-left: 0; width: 100%; }
+  .account-fields { grid-template-columns: minmax(0, 1fr); }
+  .hours-row { grid-template-columns: minmax(0, 1fr); }
+  .customer-header { padding: 1rem; }
+  .customer-header .flex { flex-wrap: wrap; }
 }

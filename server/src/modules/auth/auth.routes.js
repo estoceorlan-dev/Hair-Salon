@@ -4,6 +4,7 @@ import { validate } from '../../middleware/validate.js'
 import { authenticate, requireManager, requirePermission, trustedWrite } from '../../middleware/auth.js'
 import { cookieOptions, sessionCookie } from './auth.service.js'
 import { changePasswordSchema, employeeSchema, employeeUpdateSchema, idSchema, loginSchema, registrationSchema } from './auth.schemas.js'
+import { listSchema } from '../management/management.schemas.js'
 
 export function authRoutes(service, config) {
   const router = Router()
@@ -37,7 +38,7 @@ export function authRoutes(service, config) {
 export function employeeAccountRoutes(service, config) {
   const router = Router()
   router.use(authenticate(service), requireManager, requirePermission('employees.manage'), trustedWrite(config))
-  router.get('/', async (req, res) => res.json({ employees: await service.employees() }))
+  router.get('/', validate(listSchema, 'query'), async (req, res) => res.json(await service.employees(req.validated.query)))
   router.post('/', validate(employeeSchema), async (req, res) => {
     res.status(201).json({ employee: await service.createEmployee(req.auth.user, req.validated.body) })
   })

@@ -11,7 +11,9 @@ import Login from './components/Login'
 import CustomerPortal from './components/CustomerPortal'
 import PlaceholderPage from './pages/PlaceholderPage'
 import Settings from './pages/Settings'
-import EmployeeAccounts from './pages/EmployeeAccounts'
+import EmployeeProfiles from './pages/EmployeeProfiles'
+import Customers from './pages/Customers'
+import Services from './pages/Services'
 import ScopedRecords from './pages/ScopedRecords'
 import Account from './pages/Account'
 import { Feedback, LoadingState } from './components/ui/Feedback'
@@ -32,7 +34,7 @@ function Entry() {
   return auth.user ? <Navigate to={homeFor(auth.user)} replace /> : <Login />
 }
 const pageTitles = { dashboard: 'Dashboard', pos: 'POS', appointments: 'Appointments', inventory: 'Inventory',
-  customers: 'Customers', services: 'Services', employees: 'Employee Accounts', payroll: 'Payroll', reports: 'Reports',
+  customers: 'Customers', services: 'Services', employees: 'Employees', payroll: 'Payroll', reports: 'Reports',
   'activity-logs': 'Activity Logs', settings: 'Settings', earnings: 'My Earnings' }
 function EmployeeLayout() {
   const auth = useAuth()
@@ -66,9 +68,9 @@ export default function App() {
       <Route element={<Guard permissions={['appointments.manage', 'appointments.assigned']} />}><Route path="appointments" element={<ScopedRecords kind="appointments" />} /></Route>
       <Route element={<Guard permissions={['earnings.own']} />}><Route path="earnings" element={<ScopedRecords kind="earnings" />} /></Route>
       <Route element={<Guard permissions={['inventory.manage']} />}><Route path="inventory" element={<Inventory />} /></Route>
-      <Route element={<Guard permissions={['employees.manage']} />}><Route path="employees" element={<EmployeeAccounts />} /></Route>
-      <Route element={<Guard permissions={['customers.manage']} />}><Route path="customers" element={placeholder('Customer management', 'Customer record editing will be added in Phase 4.')} /></Route>
-      <Route element={<Guard permissions={['services.manage']} />}><Route path="services" element={placeholder('Service management', 'Service prices, durations, and eligibility remain to be defined.')} /></Route>
+      <Route element={<Guard permissions={['employees.manage']} />}><Route path="employees" element={<EmployeeProfiles />} /></Route>
+      <Route element={<Guard permissions={['customers.manage']} />}><Route path="customers" element={<Customers />} /></Route>
+      <Route element={<Guard permissions={['services.manage']} />}><Route path="services" element={<Services />} /></Route>
       <Route element={<Guard permissions={['payroll.manage']} />}><Route path="payroll" element={placeholder('Payroll', 'Payroll periods and commission rules are awaiting definition.')} /></Route>
       <Route element={<Guard permissions={['reports.view']} />}><Route path="reports" element={placeholder('Reports', 'Financial reports will be added in a later phase.')} /></Route>
       <Route element={<Guard permissions={['logs.view']} />}><Route path="activity-logs" element={placeholder('Activity logs', 'Business audit views will be added in a later phase.')} /></Route>
