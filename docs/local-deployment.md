@@ -1,4 +1,4 @@
-# Local Setup - Phases 0, 1, and 2
+# Local Setup - Phases 0-3
 
 ## Prerequisites
 
@@ -14,11 +14,12 @@ Run from `C:\Romel Hair salon`:
 npm ci
 npm --prefix server ci
 npm run db:local:setup
+npm run auth:local:setup
 npm run db:seed:demo -- --date=2026-10-12
 npm run dev:all
 ```
 
-`db:local:setup` initializes/starts PostgreSQL, creates the role and three databases, applies migrations, records their environment identities, and generates connection URLs in ignored `server/.env`. Repeating setup retains data and credentials. It refuses to replace existing URLs pointing elsewhere. Leave `JWT_SECRET` empty until Phase 3.
+`db:local:setup` initializes/starts PostgreSQL, creates the role and three databases, applies migrations, records their environment identities, and generates connection URLs in ignored `server/.env`. Repeating setup retains data and credentials. It refuses to replace existing URLs pointing elsewhere. `auth:local:setup` then generates a private JWT secret and first manager in the empty local development database. Read the generated credentials in ignored `.local-runtime/manager-account.json`; no password is logged. Restart the API after authentication setup or `.env` changes. See [authentication](authentication.md).
 
 The cluster, bootstrap credentials, logs, and demo account credentials live in ignored `.local-runtime/`. The API uses `romel_salon_dev`; seeding explicitly targets `romel_salon_demo`; integration tests explicitly target `romel_salon_test`. Setup uses SCRAM password authentication. [PostgreSQL initdb options](https://www.postgresql.org/docs/18/app-initdb.html)
 
@@ -50,18 +51,18 @@ npm run test:db
 
 Migrations are transactionally applied and checksum-tracked; add a new numbered file instead of modifying applied SQL. Fixtures have stable IDs, a reference date, and a seed checksum. A seed rerun does nothing when that version is already present. An edited seed version requires an explicit demo reset or a new seed version.
 
-Reset requires the exact name, loopback connection, matching database identity, and non-production environment. It preserves schema/migration metadata and reference definitions while clearing fictitious business data and old settings-author links. It never accepts the development database as a target. Generated passwords persist in `.local-runtime/demo-accounts.json`, and demo users are not usable for sign-in until Phase 3.
+Reset requires the exact name, loopback connection, matching database identity, and non-production environment. It preserves schema/migration metadata and reference definitions while clearing fictitious business data, sessions, and old settings-author links. It never accepts the development database as a target. Generated demo passwords persist in `.local-runtime/demo-accounts.json`; using those accounts requires explicitly selecting the demo database as described in the authentication guide. Production rejects demo accounts.
 
 ## Connection checks
 
 - `GET /api/live`: 200 when Express is running.
 - `GET /api/health`: 503 with `database.status: not_configured` when the URL is empty; 503 with `unavailable` when the database cannot be reached; 200 only after `SELECT 1` succeeds.
 - Settings -> Connection status calls health through the frontend API client and distinguishes API failure from database setup pending.
-- `POST /api/payments` (and nested payment paths) returns 501 `PAYMENTS_NOT_IMPLEMENTED`. No checkout/provider operations exist.
+- `POST /api/payments` requires a manager/cashier session plus trusted request headers, then returns 501 `PAYMENTS_NOT_IMPLEMENTED`. No checkout/provider operations exist.
 
 After local setup, readiness should be 200. To use an already configured PostgreSQL instance instead, privately set the three URLs in `server/.env`, create dedicated databases with the documented names, and migrate each target. Fresh migrations intentionally mark databases as production; only an explicitly designated demo/test database may have its `salon.database_identity.environment` changed to permit fixtures. Never relabel a real-data database to bypass the guard.
 
-Business screens still use UI fixtures. Connecting the database does not enable checkout, reserved bookings, or authentication.
+Sign-in, registration, employee account controls, and scoped read-only appointments/earnings/history use PostgreSQL. Checkout and booking changes remain disabled; other business screens retain UI fixtures/placeholders.
 
 ## Build and serve the preview through Express
 
@@ -85,7 +86,9 @@ Open **http://localhost:3000**. Express serves `dist/` and `/api` together; `/ap
 | Readiness is 503 | Run `db:local:start` or `db:local:setup`; restart the API after adding/editing connection URLs. |
 | Configuration validation fails | Fix the named variable in `.env`; use a valid HTTP origin with no path/trailing slash and a valid timezone. |
 | Browser shows an older build | Rebuild `dist/`, then restart Express. |
-| Preview route redirects to entry | Choose employee/customer preview first; real authentication is future work. |
+| Protected route redirects to sign-in | Sign in with a valid account; expired/revoked sessions require a new sign-in. |
+| Account access is not configured | Run `auth:local:setup` after database setup, then restart the API. |
+| Request rejected as untrusted | Use the configured UI/API origin; do not mix hosts during a session. Production requires an HTTPS APP_ORIGIN. |
 | Payment controls are disabled | Intended: all providers and checkout are placeholders. |
 
 ## Data persistence and recovery

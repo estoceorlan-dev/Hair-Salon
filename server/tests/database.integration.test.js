@@ -122,7 +122,9 @@ test('PostgreSQL schema, fixtures, and concurrency', async (t) => {
       assert.equal(
         (
           await pool.query(
-            'SELECT count(*)::int AS count FROM salon.role_permissions',
+            `SELECT count(*)::int AS count FROM salon.role_permissions rp
+             JOIN salon.roles r ON r.id=rp.role_id JOIN salon.permissions p ON p.id=rp.permission_id
+             WHERE r.code<>'manager' AND p.code IN ('inventory.manage','settings.manage','reports.view','employees.manage')`,
           )
         ).rows[0].count,
         0,

@@ -1,8 +1,20 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
+import { useAuth } from '../auth/AuthContext'
+import { apiErrorMessage } from '../api/client'
+import ScopedRecords from '../pages/ScopedRecords'
 import { Calendar, Scissors, CheckCircle, LogOut } from 'lucide-react'
 import { Feedback, FieldError } from './ui/Feedback'
 
-export default function CustomerPortal({ onLogout }) {
+export default function CustomerPortal() {
+  const auth = useAuth()
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
+  const onLogout = async () => {
+    setLoggingOut(true); setLogoutError('')
+    try { await auth.logout() } catch (err) { setLogoutError(apiErrorMessage(err)) }
+    finally { setLoggingOut(false) }
+  }
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState(null)
   const [selectedDate, setSelectedDate] = useState('')
@@ -71,13 +83,15 @@ export default function CustomerPortal({ onLogout }) {
           </h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span className="font-bold text-sm">Hello, Guest</span>
+          <span className="font-bold text-sm">Hello, {auth.user.displayName}</span>
+          <Link to="/account">My Account</Link>
           <button
             className="btn btn-secondary"
             style={{ padding: '0.5rem 1rem' }}
             onClick={onLogout}
+            disabled={loggingOut}
           >
-            <LogOut size={16} style={{ marginRight: '0.5rem' }} /> Exit preview
+            <LogOut size={16} style={{ marginRight: '0.5rem' }} /> Sign out
           </button>
         </div>
       </header>
@@ -86,6 +100,9 @@ export default function CustomerPortal({ onLogout }) {
       <main
         style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}
       >
+        {logoutError && <Feedback tone="error">{logoutError}</Feedback>}
+        <ScopedRecords kind="appointments" />
+        <ScopedRecords kind="history" />
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <h1 className="text-2xl font-bold">Book an Appointment</h1>
           <p className="text-muted">

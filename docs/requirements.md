@@ -2,7 +2,7 @@
 
 ## Delivery agreement
 
-Phases 0-2 document the scope, build the application foundation, and create PostgreSQL storage/migrations/fixtures. Business definitions remain placeholders at the user's request. Screens, prices, statistics, and time slots are sample UI data; PostgreSQL also has separate fictitious fixtures for later work. Authentication, business API integration, checkout, and providers belong to later phases.
+Phases 0-3 establish the scope, application/database foundation, verified sessions, registration, manager account controls, and role/ownership enforcement. Business definitions remain placeholders. Appointments, personal earnings, and customer history have scoped read APIs; dashboard figures, prices, and time slots remain sample UI data. Checkout, booking changes, and providers belong to later phases.
 
 GCash, Maya, and card appear in POS but are disabled and display-only. Cash checkout is also pending. There are no provider SDKs, QR codes, payment links, provider credentials, card-detail fields, or payment recording endpoints. Synthetic historical cash records are database fixtures only.
 
@@ -12,7 +12,7 @@ GCash, Maya, and card appear in POS but are disabled and display-only. Cash chec
 - Styling: retain the existing custom CSS and color palette. Tailwind in the original architecture is deferred; a rewrite is not required.
 - Backend: Node + Express REST API with configuration, validation, safe errors, request logging, and a PostgreSQL pool.
 - Persistence: PostgreSQL 18.3 workspace cluster on port 5433; dedicated dev/demo/test databases, generated credentials, versioned migrations, and guarded fixtures/reset are implemented. Readiness is 200 when connected, 503 otherwise.
-- Authentication: JWT/bcrypt/cookie/rate-limit dependencies are installed for Phase 3. Current access selection is a UI preview, not verified identity or authorization.
+- Authentication: revocable JWT sessions in HttpOnly cookies, bcrypt account/password controls, strict-origin JSON writes, rate limiting, and database-backed permissions are implemented in Phase 3. Undefined permissions remain denied.
 - Deployment: localhost first. Render remains an optional future phase. PHP currency and `Asia/Manila` display dates are the project defaults.
 
 ## Screens and requirements
@@ -52,4 +52,4 @@ Use simple, responsive screens; enforce identity/role/ownership at the API; pres
 
 ## Excluded from this milestone
 
-Provider payments, business booking/checkout endpoints, real authentication, automatic consumption at service/checkout, payroll calculation, public booking, email/SMS, loyalty campaigns, and cloud deployment. Phase 2 does atomically maintain stock when an explicit movement is inserted; it does not choose or implement a service consumption policy.
+Provider payments, business booking/checkout writes, automatic consumption at service/checkout, payroll calculation, publicly hosted booking, email/SMS, loyalty campaigns, and cloud deployment remain future work. Phase 2 atomically maintains stock when an explicit movement is inserted; it does not choose a service consumption policy. Phase 3 adds identity and scoped reads.

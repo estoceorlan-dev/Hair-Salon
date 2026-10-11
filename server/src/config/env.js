@@ -56,6 +56,15 @@ const environmentSchema = z.object({
     (value) => !value || value.length >= 32,
     'Must contain at least 32 characters when configured',
   ),
+  SESSION_TTL_SECONDS: z.coerce.number().int().min(60).max(86400).default(28800),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(1).default(0),
+}).superRefine((value, ctx) => {
+  if (value.NODE_ENV !== 'production') return
+  for (const key of ['DATABASE_URL', 'JWT_SECRET']) {
+    if (!value[key]) ctx.addIssue({ code: 'custom', path: [key], message: 'Required in production' })
+  }
+  if (!value.APP_ORIGIN.startsWith('https://'))
+    ctx.addIssue({ code: 'custom', path: ['APP_ORIGIN'], message: 'Use an HTTPS origin in production' })
 })
 
 export function parseEnvironment(environment) {
@@ -79,6 +88,8 @@ export function parseEnvironment(environment) {
     testDatabaseUrl: value.TEST_DATABASE_URL,
     dbConnectionTimeoutMs: value.DB_CONNECTION_TIMEOUT_MS,
     jwtSecret: value.JWT_SECRET,
+    sessionTtlSeconds: value.SESSION_TTL_SECONDS,
+    trustProxyHops: value.TRUST_PROXY_HOPS,
   }
 }
 

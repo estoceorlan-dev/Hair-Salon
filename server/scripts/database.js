@@ -104,7 +104,7 @@ try {
       `Demo fixtures ${result.inserted ? 'loaded' : 'already present'}; reference date ${result.referenceDate}.`,
     )
     console.info(
-      'Future demo account credentials are in ignored .local-runtime/demo-accounts.json; authentication remains Phase 3.',
+      'Demo account credentials are in ignored .local-runtime/demo-accounts.json. Use an explicitly selected demo database for sign-in.',
     )
   } else if (command === 'reset-demo') {
     const count = await resetDemo(pool, {

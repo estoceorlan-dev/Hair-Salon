@@ -16,6 +16,7 @@
     "start": "npm --prefix server start",
     "test": "npm --prefix server test",
     "test:db": "npm --prefix server run test:db",
+    "auth:local:setup": "npm --prefix server run auth:local:setup",
     "db:local:setup": "npm --prefix server run db:local:setup",
     "db:local:start": "npm --prefix server run db:local:start",
     "db:local:stop": "npm --prefix server run db:local:stop",

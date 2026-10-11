@@ -32,7 +32,7 @@ The user requested that definitions remain placeholders for now. The entries bel
 | Commission basis/rate/eligibility | TBD; amount/rate/timing/reversal rules | `commissionPolicy: null`; no calculation | Phases 7-8 |
 | Payroll period/base pay/adjustments | TBD; approval and payout ownership | `payrollPeriod: null`; no calculation | Phase 8 |
 | Report periods/revenue definition | TBD; gross/net/refund/unpaid treatment | Existing dashboard totals are samples | Phase 8 |
-| Permissions and record visibility | Proposed matrix; final exceptions TBD | UI preview routing only | Phase 3 |
+| Permissions and record visibility | Conservative Phase 3 matrix; overrides/expanded non-manager access TBD | Server permissions and own/assigned reads; undefined access denied | Phase 3 implemented; expansion in later phases |
 | Performance/capacity/recovery targets | TBD with representative dataset | Foundation smoke checks only | Phases 9-10 |
 
 ## Future checkout contract to review

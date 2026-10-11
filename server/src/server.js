@@ -5,9 +5,10 @@ import { createApp } from './app.js'
 try {
   const config = loadEnvironment()
   const database = createDatabase(config)
-  const app = createApp({ database })
+  const app = createApp({ database, config })
   const server = app.listen(config.port, config.host, () => {
     console.info(`Romel API listening at http://${config.host}:${config.port}`)
+    if (!config.jwtSecret) console.info('Run npm run auth:local:setup to configure sign-in and the first local manager.')
     if (!config.databaseUrl)
       console.info(
         'Database connection is not configured; run npm run db:local:setup. /api/health returns 503 until connected.',

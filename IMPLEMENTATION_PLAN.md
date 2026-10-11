@@ -4,7 +4,7 @@
 
 **Optional milestone:** deploy the verified application to Render after the local presentation.
 
-**Status:** Phases 0-2 implemented; business definitions remain placeholders by request. Phases 3-11 remain planned. Payment options remain disabled/display-only.
+**Status:** Phases 0-3 implemented; business definitions remain placeholders by request. Phases 4-11 remain planned. Payment options remain disabled/display-only.
 
 **Prepared:** October 10, 2026, Asia/Manila.
 
@@ -148,15 +148,17 @@ docs/
 
 **Goal:** replace the view-selection login with verified identity and server-enforced permissions.
 
-- [ ] Implement login, logout, current-session lookup, manager-managed employee accounts, and customer registration linked to customer records.
-- [ ] Hash passwords with bcrypt; validate credentials; use expiring JWTs in HTTP-only cookies with a defined logout/revocation strategy.
-- [ ] Configure cookies for local HTTP and hosted HTTPS, and enforce trusted origins/CSRF protection on state-changing cookie-authenticated requests.
-- [ ] Enforce permissions on every API operation. Frontend guards control navigation but are not the authorization boundary.
-- [ ] Restrict service staff to their assigned appointments and permitted personal earnings; restrict customers to their own bookings/history.
-- [ ] Replace the fixed manager name in the header with the authenticated profile and role. Restore sessions safely on reload and handle expiry.
-- [ ] Remove hard-coded login credentials and prevent demo accounts from being automatically created in a hosted production database.
+- [x] Implement login/logout/session lookup, customer registration with a fresh linked profile, and manager employee-account list/create/edit/role/password/active controls.
+- [x] Use bcrypt cost 12 for new credentials and expiring HS256 JWTs in HttpOnly cookies. Migration 004 adds persisted sessions; logout revokes one session and account/password changes revoke all affected sessions.
+- [x] Require trusted Origin, a custom browser header, and JSON for implemented writes. Use local HTTP cookies and production Secure cookies; production validates HTTPS origin/secret/database settings.
+- [x] Load current role/grants/active profiles on every protected API request. Add matching route/navigation guards; undefined non-manager permissions remain denied.
+- [x] Serve read-only salon/assigned/own appointment lists and scoped personal earnings/customer history; ignore supplied ownership query parameters and reject foreign record IDs.
+- [x] Display the verified profile/role in employee/customer headers; restore via session lookup, recheck on focus, and clear expired/revoked access. Add My Account password changes.
+- [x] Remove preview access as an authentication mechanism. Generate ignored local-manager credentials only in an empty, marked development database; bootstrap/fixtures refuse production, and production sign-in rejects demo users.
 
 **Exit criterion:** each role sees the correct screens; unauthenticated, forbidden, expired-session, and cross-customer API requests are rejected.
+
+**Verification:** sixteen foundation/tool/auth tests and sixteen real PostgreSQL scenarios pass. Headless Chrome checks cover all five role views, reload/route denial, employee create/edit, customer registration, logout, password change, and mobile login. Local manager setup succeeds and reruns without changing accounts. Lint/build pass. See [authentication contracts/setup](docs/authentication.md) and [implemented access matrix](docs/role-permissions.md). Tax, booking/consumption, commission/payroll definitions, and all payment processing remain deferred.
 
 ## Phase 4 - Customer, Service, Employee, and Settings Management
 

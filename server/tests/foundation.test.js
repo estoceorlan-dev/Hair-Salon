@@ -62,7 +62,7 @@ test('ready and unavailable database results are reflected in HTTP readiness', a
   }
 })
 
-test('payment requests fail explicitly instead of recording or simulating success', async (t) => {
+test('payment requests require a verified account before reaching the disabled workflow', async (t) => {
   const base = await start(t, appFor('not_configured'))
   for (const endpoint of [
     '/api/payments',
@@ -75,8 +75,8 @@ test('payment requests fail explicitly instead of recording or simulating succes
       headers: { 'Content-Type': 'application/json' },
       body: '{}',
     })
-    assert.equal(response.status, 501)
-    assert.equal((await response.json()).error.code, 'PAYMENTS_NOT_IMPLEMENTED')
+    assert.equal(response.status, 401)
+    assert.equal((await response.json()).error.code, 'AUTH_REQUIRED')
   }
 })
 

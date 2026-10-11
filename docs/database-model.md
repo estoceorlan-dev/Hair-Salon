@@ -1,16 +1,17 @@
 # PostgreSQL Model and Data Dictionary
 
-## Phase 2 implementation
+## Phases 2-3 implementation
 
 The application schema is `salon`; migration history is in `public.schema_migrations`. Local PostgreSQL 18.3 runs on loopback port 5433 using the installed binaries. An isolated workspace cluster contains `romel_salon_dev`, `romel_salon_demo`, and `romel_salon_test`, owned by the dedicated non-superuser `romel_app` role. Bootstrap administration uses a separate generated local role.
 
-This phase creates storage and integrity rules. Business APIs, authentication, service consumption timing, final prices/taxes, commission/payroll rules, and payment providers remain future work. Synthetic historical cash fixtures are not actual payment processing.
+The database now has 35 application tables and four migrations, including Phase 3 revocable sessions and conservative role grants. Authentication/account APIs and scoped appointment/earnings/history reads are implemented. Business writes, service consumption timing, final prices/taxes, commission/payroll rules, and payment providers remain future work. Synthetic historical cash fixtures are not actual payment processing.
 
 ## Entity relationships
 
 ```mermaid
 erDiagram
     roles ||--o{ users : assigns
+    users ||--o{ auth_sessions : signs_in
     roles ||--o{ role_permissions : grants
     permissions ||--o{ role_permissions : defines
     users o|--o| employees : login_profile
@@ -75,7 +76,8 @@ Supporting tables not connected in the diagram: `database_identity`, `business_h
 | `roles` | UUID PK; unique code | Manager, cashier, stylist, beautician, customer |
 | `permissions` | UUID PK; unique code, description | Candidate capabilities; no default role grants |
 | `role_permissions` | Composite PK role_id + permission_id; both FKs | Empty until the proposed permission policy is agreed |
-| `users` | UUID PK; role FK; unique normalized email; password_hash | Bcrypt fixture hashes, active/demo flags, token_version reserved for Phase 3 |
+| `users` | UUID PK; role FK; unique normalized email; password_hash | Bcrypt hashes, active/demo flags, token_version checked on every authenticated request |
+| `auth_sessions` | UUID PK; user FK; token_version; created_at/expires_at/revoked_at | Revocable JWT sessions; account changes revoke all sessions; logout revokes one |
 | `employees` | UUID PK; unique nullable user FK; unique employee_code | Job kind, active flag; base pay and commission policy nullable |
 | `customers` | UUID PK; unique nullable user FK; preferred employee FK | Registered or walk-in profile, contact details, preferences; customer records need not have accounts |
 | `services` | UUID PK; unique code; price_cents, duration_minutes | Nullable definitions; demo prices/durations explicitly flagged |
@@ -116,11 +118,11 @@ Supporting tables not connected in the diagram: `database_identity`, `business_h
 - Migration runners use a session advisory lock plus one transaction per file. Seeds/resets use the same lock namespace transactionally. Failed files roll back schema changes and their history entry together. [PostgreSQL advisory locks](https://www.postgresql.org/docs/18/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS)
 - Fixtures/reset require non-production execution, a loopback URL, an exact dedicated database name, and a matching database identity/current database. Reset additionally requires the exact confirmation name. URL query parameters cannot override the selected host/user/database.
 
-These constraints do not implement business checkout: cross-table sales/payment reconciliation, approved payroll freeze, refunds, authentication, and external-provider verification still require the later application workflows and their tests.
+These constraints do not implement business checkout: cross-table sales/payment reconciliation, approved payroll freeze, refunds, and external-provider verification still require later application workflows and tests. Authentication is implemented in Phase 3.
 
 ## Demo dataset
 
-The demo has five hashed-password users, four employee profiles, two customers, four services, three products with opening stock, four appointments, two explicitly fictitious paid cash sales, two pending-definition commission entries, one draft payroll period/four items, one low-stock notification, and one fixture activity entry. Prices and minimum stock are sample values. Consumption and all financial policies remain undefined; no permissions are granted and no provider is enabled.
+The demo has five hashed-password users, four employee profiles, two customers, four services, three products with opening stock, four appointments, two explicitly fictitious paid cash sales, two pending-definition commission entries, one draft payroll period/four items, one low-stock notification, and one fixture activity entry. Prices and minimum stock are sample values. Consumption and financial policies remain undefined. Migration 004 grants conservative role access; no provider is enabled.
 
 `--date=2026-10-12` makes reference dates reproducible; sample appointments skip the fixture's Sunday closure. Repeating the seed keeps the same rows/date. A separate generated credentials file persists passwords between resets without committing them.
 
