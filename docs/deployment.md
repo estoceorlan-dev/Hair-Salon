@@ -4,6 +4,10 @@ The repository deploys as one Vercel project. Vite produces static assets in `di
 
 ## Prepare a Neon branch
 
+This checkout is linked to project `small-moon-82681867`, branch `production`, in Singapore. `neon.ts` declares the private `salon-images` bucket. Run `neon deploy` to reconcile that configuration and refresh the branch credentials in ignored `.env.local`.
+
+The local server loads environment files in this order: root `.env.local`, root `.env`, then `server/.env`. Variables supplied by the hosting runtime take precedence. Set `NEON_STORAGE_BUCKET=salon-images`, `DB_CONNECTION_TIMEOUT_MS=10000`, and a private `JWT_SECRET` alongside the pulled variables. The existing Node `pg` pool uses `DATABASE_URL`, and the image API uses the pulled `AWS_*` credentials.
+
 1. Create a Neon project in a region that offers Object Storage. Singapore (`aws-ap-southeast-1`) is one option near the salon's Manila timezone. Create a separate branch for preview deployments.
 2. For each branch, obtain its pooled and direct connection strings from the Neon connection dialog. Preserve the TLS query parameters. The web function uses the pooled URL and release commands use the direct URL because schema migrations hold a session advisory lock. [Neon connection pooling](https://neon.com/docs/connect/connection-pooling)
 3. Link the Neon CLI to the project and select the intended branch. Create a private bucket named `salon-images` and obtain the branch's S3 endpoint, region, access key and secret key. The Neon quickstart documents credential creation and the `neon buckets create salon-images` command. [Neon Object Storage quickstart](https://neon.com/docs/storage/get-started)

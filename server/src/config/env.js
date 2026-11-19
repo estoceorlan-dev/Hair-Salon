@@ -95,7 +95,8 @@ export function parseEnvironment(environment) {
 
 export function loadEnvironment() {
   dotenv.config({
-    path: fileURLToPath(new URL('../../.env', import.meta.url)),
+    path: ['../../../.env.local', '../../../.env', '../../.env'].map((name) =>
+      fileURLToPath(new URL(name, import.meta.url))),
     quiet: true,
   })
   return parseEnvironment(process.env)
