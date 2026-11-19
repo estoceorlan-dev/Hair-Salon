@@ -10,10 +10,10 @@
       "includeFiles": "server/node_modules/{@img/**,bcrypt/prebuilds/**}"
     }
   },
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/salon" },
-    { "source": "/app/:path*", "destination": "/index.html" },
-    { "source": "/book", "destination": "/index.html" },
-    { "source": "/account", "destination": "/index.html" }
+  "routes": [
+    { "src": "^/api(?:/.*)?$", "dest": "/api/salon" },
+    { "src": "^/app(?:/.*)?$", "dest": "/index.html" },
+    { "src": "^/(?:book|account)/?$", "dest": "/index.html" },
+    { "handle": "filesystem" }
   ]
 }
