@@ -7,7 +7,10 @@ export function createDatabase(config, logger = console) {
         max: 5,
         connectionTimeoutMillis: config.dbConnectionTimeoutMs,
         query_timeout: config.dbConnectionTimeoutMs,
-        statement_timeout: config.dbConnectionTimeoutMs,
+        // Neon's transaction pooler rejects statement_timeout in the startup packet.
+        statement_timeout: new URL(config.databaseUrl).hostname.split('.')[0].endsWith('-pooler')
+          ? undefined
+          : config.dbConnectionTimeoutMs,
         idleTimeoutMillis: 10000,
       })
     : null

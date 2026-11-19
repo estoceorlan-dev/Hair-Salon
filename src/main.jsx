@@ -4,12 +4,14 @@ import { BrowserRouter } from 'react-router'
 import AuthProvider from './auth/AuthProvider'
 import './index.css'
 import App from './App.jsx'
+import ThemeToggle from './components/ThemeToggle'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <App />
+        <ThemeToggle />
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

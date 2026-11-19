@@ -31,7 +31,8 @@ export function createApp({
       },
     }),
   )
-  app.use(express.json({ limit: '100kb' }))
+  const json = express.json({ limit: '100kb' })
+  app.use((req,res,next) => req.path.startsWith('/api/images/') ? next() : json(req,res,next))
   app.use(cookieParser())
   app.use('/api', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store')
@@ -52,7 +53,7 @@ export function createApp({
   app.use('/api', (req, res, next) => {
     const resource = req.path.split('/')[1]
     if (['appointments', 'me', 'customers', 'services', 'sales', 'inventory', 'payroll',
-      'reports', 'settings', 'activity-logs', 'dashboard', 'payments'].includes(resource))
+      'slots', 'images', 'reports', 'settings', 'activity-logs', 'dashboard', 'payments'].includes(resource))
       return protectedApi(req, res, next)
     next()
   })

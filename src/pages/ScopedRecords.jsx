@@ -25,7 +25,6 @@ export default function ScopedRecords({ kind }) {
     return () => controller.abort()
   }, [kind, key])
   return <section className="card records-card"><h2>{titles[kind]}</h2>
-    <p className="text-muted text-sm">{kind === 'earnings' ? 'Commission and payroll calculations are awaiting definition.' : 'Saved records only. Booking changes will be available in Phase 5.'} Showing up to 100 recent records.</p>
     {loading ? <LoadingState /> : error ? <><Feedback tone="error">{error}</Feedback><button className="btn btn-secondary mt-4" onClick={() => { setError(''); setRetry(retry + 1) }}>Retry</button></>
       : !rows.length ? <EmptyState title="No records yet" /> : <div className="table-container"><table>
         <thead><tr><th>{kind === 'appointments' ? 'Booking / service' : kind === 'history' ? 'Receipt / services' : 'Service'}</th><th>Date (Manila)</th><th>{kind === 'appointments' ? 'People' : 'Amount'}</th><th>Status</th></tr></thead>

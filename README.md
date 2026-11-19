@@ -1,55 +1,53 @@
 # Romel Hair Salon
 
-React + Vite frontend, Express API, and PostgreSQL salon management system. Phases 0-4 are implemented: verified sessions, role access, customer records/history, a shared service catalog, employee accounts/profiles/availability, and manager settings. Undefined business rules remain placeholders. GCash, Maya, card, and cash checkout remain disabled/display-only.
+A full-stack salon management app that follows a visit from booking to payroll. Customers reserve a time with an eligible stylist. At checkout, the cashier can turn the completed appointment into a receipt, and the same transaction records stock usage and the stylist’s commission.
 
-## Local development
+![Romel Hair Salon sign-in screen with a salon interior, account form, and light and dark theme switch](docs/salon-preview.webp)
 
-Use Node 22.18+ (22.x) or 24.x. From the project root:
+## A visit through the app
 
-```powershell
+| Who | What they can do |
+| --- | --- |
+| Customer | Choose a service, stylist, and available time. Reschedule or cancel a booking and view past services. |
+| Stylist or beautician | See assigned appointments, update their status, and review personal earnings. |
+| Receptionist or cashier | Schedule visits, look up customers, ring up services and retail products, and print cash receipts. |
+| Manager | Set prices and hours, upload service photos, adjust stock, review sales and refunds, and approve payroll. |
+
+## Engineering highlights
+
+- **Concurrent bookings.** PostgreSQL enforces non-overlapping appointments for each stylist. Two customers can select the same time, but only one reservation can commit.
+- **Retry-safe checkout.** A checkout key identifies a sale across retries. The API writes the payment, stock movements, and commission entries in one transaction so a retry cannot charge twice or deduct stock twice.
+- **Private service photos.** The server validates JPEG, PNG, and WebP uploads, resizes them, and stores WebP images in a private bucket. PostgreSQL tracks the object key. The browser retrieves the photo through the authenticated API.
+- **Accessible presentation.** The responsive React interface includes a persistent sun/moon theme switch and respects reduced-motion preferences. Receipts print separately from the workspace.
+
+Built with React, Vite, React Router, Express, and PostgreSQL. The deployment configuration targets Vercel, Neon Postgres, and Neon Object Storage. Checkout currently supports cash.
+
+## Run locally
+
+Install Node.js 22.18+ in the 22.x series or Node.js 24.x, plus PostgreSQL 18. On Windows, local setup looks in `C:\Program Files\PostgreSQL\18\bin`. Set `PG_BIN` to your PostgreSQL binary directory for another installation.
+
+```sh
 npm ci
 npm --prefix server ci
 npm run db:local:setup
 npm run auth:local:setup
-npm run db:seed:demo -- --date=2026-10-12
 npm run dev:all
 ```
 
-Open **http://localhost:5173** and sign in using the generated manager credentials in ignored `.local-runtime/manager-account.json`. The UI/API start together; Ctrl+C stops them. Local database setup uses the installed PostgreSQL 18 binaries and an isolated cluster on loopback port 5433. Authentication setup generates an ignored JWT secret and first local manager; repeating it preserves accounts. After a computer restart, use `npm run db:local:start`; use `db:local:stop` to stop that cluster.
+Open [the local app](http://localhost:5173). The first manager’s credentials are generated in the Git-ignored `.local-runtime/manager-account.json`. To try a booking, use the manager account to create a stylist and an active service with a duration, assign the stylist to the service, then register a customer account.
 
-Settings persists manager configuration through Vite's `/api` proxy. `/api/live` reports API liveness; `/api/health` returns 200 with a reachable database, or 503 if unavailable/unconfigured. Development, demo, and test databases are separate. The seed has explicitly fictitious historical cash records; no live payment workflow is enabled. Existing installations should run `npm run db:migrate` and `npm run db:migrate -- --target=demo` to apply Phase 4 without resetting records.
+## Verify
 
-## Checks and built preview
-
-```powershell
+```sh
 npm run lint
 npm test
 npm run test:db
 npm run build
-npm start
 ```
 
-Stop the development API first to free port 3000. Open **http://localhost:3000** for the built frontend and API served together. Database-backed transactions and the final presentation are later milestones.
+The integration suite uses a separate local PostgreSQL database. It exercises booking conflicts, checkout retries, refunds, payroll, and image replacement. After building, stop the development servers and run `npm start` to open the [production build locally](http://localhost:3000).
 
-## Project documents
+## Documentation
 
-- [Implementation phases](IMPLEMENTATION_PLAN.md)
-- [Architecture](ARCHITECTURE.md)
-- [Requirement/workflow map](docs/requirements.md)
-- [Implemented role access](docs/role-permissions.md)
-- [Authentication and account setup](docs/authentication.md)
-- [Phase 4 management screens and API contracts](docs/master-data.md)
-- [Business-rule placeholders](docs/business-rules.md)
-- [Database model and data dictionary](docs/database-model.md)
-- [Local setup and troubleshooting](docs/local-deployment.md)
-- [Foundation presentation guide](docs/presentation-guide.md)
-
-## Implementation boundaries
-
-`src/` contains the UI, session provider, permission guards, master-record/settings forms, shared catalog, feedback and Axios client. `server/` contains authentication/access and management APIs, configuration, PostgreSQL, middleware, health/payment placeholder routes, five migrations, local setup tooling, guarded fixtures/reset, and database integration tests. Separate lockfiles make installs reproducible.
-
-Sign-in uses revocable database-backed JWT sessions in HttpOnly cookies. Customer/service/employee/settings changes are persisted and audited. POS and customer service choices use the active catalog; booking reservations, inventory operations, checkout and financial calculations remain later work. Dashboard figures remain samples. Payment endpoints require an authorized account and still return 501. Provider flags remain disabled. Render remains optional Phase 11.
-
-`npm run db:migrate` changes schema without seeding/resetting; `npm run db:seed:demo` loads the dedicated local demo once. To explicitly rebuild only that demo dataset, use `npm run db:reset:demo -- --confirm=romel_salon_demo`, then seed again. See setup docs for target selection and safeguards.
-
-The foundation uses Express route/controller/service modules, React Router's declarative routes, and Vite's proxy. Technical references: [Express error handling](https://expressjs.com/en/5x/guide/error-handling/), [React Router installation](https://reactrouter.com/start/declarative/installation), [PostgreSQL connection pooling](https://node-postgres.com/apis/pool), and [Vite server options](https://vite.dev/config/server-options).
+- [Architecture](ARCHITECTURE.md) covers request handling, access control, and transaction boundaries.
+- [Deployment](docs/deployment.md) covers Vercel configuration, Neon storage, database migrations, and the first production manager.

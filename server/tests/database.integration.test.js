@@ -114,7 +114,7 @@ test('PostgreSQL schema, fixtures, and concurrency', async (t) => {
       assert.equal(
         (
           await pool.query(
-            'SELECT count(*)::int AS count FROM salon.payment_methods WHERE enabled',
+            "SELECT count(*)::int AS count FROM salon.payment_methods WHERE enabled AND code <> 'cash'",
           )
         ).rows[0].count,
         0,

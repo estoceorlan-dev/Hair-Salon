@@ -5,6 +5,8 @@ import { homeFor, useAuth } from './auth/AuthContext'
 import { apiErrorMessage } from './api/client'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
+import Appointments from './components/Appointments'
+import Finance from './pages/Finance'
 import POS from './components/POS'
 import Inventory from './components/Inventory'
 import Login from './components/Login'
@@ -49,7 +51,7 @@ function EmployeeLayout() {
   }
   return <div className="app-container"><Sidebar /><main className="main-content">
     <div className="top-header"><div><h1 className="text-2xl font-bold">{title}</h1>
-      <p className="text-muted text-sm">Romel Hair Salon</p></div><div className="flex items-center gap-4">
+      </div><div className="flex items-center gap-4">
       <div className="profile-avatar">{auth.user.displayName.split(' ').map((s) => s[0]).slice(0, 2).join('')}</div>
       <div><p className="text-sm font-bold">{auth.user.displayName}</p><p className="text-muted text-sm">{auth.user.roleName}</p></div>
       <button className="btn btn-secondary" aria-label="Sign out" disabled={pending} onClick={logout}><LogOut size={16} /></button>
@@ -63,17 +65,17 @@ export default function App() {
     <Route path="/" element={<Entry />} />
     <Route element={<Guard employee />}><Route path="/app" element={<EmployeeLayout />}>
       <Route index element={<EmployeeHome />} />
-      <Route element={<Guard permissions={['dashboard.view']} />}><Route path="dashboard" element={<><Feedback>Sample dashboard figures. Live analytics are planned for a later phase.</Feedback><Dashboard /></>} /></Route>
+      <Route element={<Guard permissions={['dashboard.view']} />}><Route path="dashboard" element={<Dashboard />} /></Route>
       <Route element={<Guard permissions={['sales.manage']} />}><Route path="pos" element={<POS />} /></Route>
-      <Route element={<Guard permissions={['appointments.manage', 'appointments.assigned']} />}><Route path="appointments" element={<ScopedRecords kind="appointments" />} /></Route>
+      <Route element={<Guard permissions={['appointments.manage', 'appointments.assigned']} />}><Route path="appointments" element={<Appointments />} /></Route>
       <Route element={<Guard permissions={['earnings.own']} />}><Route path="earnings" element={<ScopedRecords kind="earnings" />} /></Route>
       <Route element={<Guard permissions={['inventory.manage']} />}><Route path="inventory" element={<Inventory />} /></Route>
       <Route element={<Guard permissions={['employees.manage']} />}><Route path="employees" element={<EmployeeProfiles />} /></Route>
       <Route element={<Guard permissions={['customers.manage']} />}><Route path="customers" element={<Customers />} /></Route>
       <Route element={<Guard permissions={['services.manage']} />}><Route path="services" element={<Services />} /></Route>
-      <Route element={<Guard permissions={['payroll.manage']} />}><Route path="payroll" element={placeholder('Payroll', 'Payroll periods and commission rules are awaiting definition.')} /></Route>
-      <Route element={<Guard permissions={['reports.view']} />}><Route path="reports" element={placeholder('Reports', 'Financial reports will be added in a later phase.')} /></Route>
-      <Route element={<Guard permissions={['logs.view']} />}><Route path="activity-logs" element={placeholder('Activity logs', 'Business audit views will be added in a later phase.')} /></Route>
+      <Route element={<Guard permissions={['payroll.manage']} />}><Route path="payroll" element={<Finance kind="payroll" />} /></Route>
+      <Route element={<Guard permissions={['reports.view']} />}><Route path="reports" element={<Finance kind="reports" />} /></Route>
+      <Route element={<Guard permissions={['logs.view']} />}><Route path="activity-logs" element={<Finance kind="activity-logs" />} /></Route>
       <Route element={<Guard permissions={['settings.manage']} />}><Route path="settings" element={<Settings />} /></Route>
       <Route path="*" element={placeholder('Page not found', 'Choose a page from the navigation.')} />
     </Route></Route>

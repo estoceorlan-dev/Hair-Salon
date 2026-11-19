@@ -130,7 +130,7 @@ test('Phase 4 persisted master records, settings, and access', async (t) => {
     assert.equal((await request('/settings', 'manager', 'PUT', periods)).status, 200)
     assert.equal((await request('/payments/cash', 'manager', 'POST')).status, 501)
     const final = await request('/settings')
-    assert.ok(final.data.payments.every((p) => p.enabled === false))
+    assert.deepEqual(final.data.payments.filter((p) => p.enabled).map((p) => p.code), ['cash'])
     assert.equal(final.data.settings.find((s) => s.key === 'tax_policy').value, null)
     assert.equal((await request('/settings/closures/' + closure.data.item.id, 'manager', 'DELETE')).status, 204)
   })

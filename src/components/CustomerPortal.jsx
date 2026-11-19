@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { apiErrorMessage } from '../api/client'
 import ScopedRecords from '../pages/ScopedRecords'
-import BookingCatalog from './BookingCatalog'
+import Appointments from './Appointments'
 import { Feedback } from './ui/Feedback'
 
 export default function CustomerPortal() {
@@ -18,6 +18,6 @@ export default function CustomerPortal() {
     <div className="flex items-center gap-4"><span>Hello, {auth.user.displayName}</span><Link to="/account">My Account</Link>
       <button className="btn btn-secondary" disabled={pending} onClick={logout}><LogOut size={16} />Sign out</button></div>
   </header><main className="customer-main flex-col gap-4">
-    {error && <Feedback tone="error">{error}</Feedback>}<ScopedRecords kind="appointments" /><ScopedRecords kind="history" /><BookingCatalog />
+    {error && <Feedback tone="error">{error}</Feedback>}<Appointments /><ScopedRecords kind="history" />
   </main></div>
 }

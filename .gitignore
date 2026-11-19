@@ -24,6 +24,8 @@ backups/
 server/data/
 __pycache__/
 .local-runtime/
+.vercel/
+.neon
 
 # Editor directories and files
 .vscode/*

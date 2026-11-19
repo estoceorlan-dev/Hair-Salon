@@ -23,7 +23,7 @@ function Availability({ employee }) {
     catch (err) { setMessage({ tone: 'error', text: apiErrorMessage(err) }) } finally { setPending(false) }
   }
   return <section className="card"><h2>Availability · {employee.display_name}</h2>
-    <p className="text-muted">All times are Asia/Manila. Availability entries cannot overlap. Booking enforcement arrives in Phase 5.</p>
+    <p className="text-muted">Times are in Manila time.</p>
     {message && <Feedback tone={message.tone}>{message.text}</Feedback>}
     <form className="auth-form account-fields" onSubmit={add}>
       <Field label="Start (Manila)" type="datetime-local" name="start" required />

@@ -1,70 +1,53 @@
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { api } from '../api/client'
+import { useAuth } from '../auth/AuthContext'
+import { useRecords } from '../hooks/useRecords'
+import { useCatalog } from '../hooks/useCatalog'
+import { Field,Select } from './ui/Management'
+import { Feedback,LoadingState } from './ui/Feedback'
+import { useAction } from '../hooks/useAction'
+import { dateTime, today } from '../config/operation-format'
+import { CustomerChoice } from './ui/Operations'
 
-export default function Appointments() {
-  const appointments = [
-    { id: 1, time: '09:00 AM', name: 'Anna Lee', service: 'Haircut & Blowdry', stylist: 'Jane', status: 'Completed' },
-    { id: 2, time: '10:00 AM', name: 'Maria Santos', service: 'Hair Coloring', stylist: 'Jane', status: 'In Progress' },
-    { id: 3, time: '11:30 AM', name: 'Juan Dela Cruz', service: 'Men\'s Haircut', stylist: 'Mark', status: 'Confirmed' },
-    { id: 4, time: '01:00 PM', name: 'Elena Reyes', service: 'Rebond & Treatment', stylist: 'Jane', status: 'Confirmed' },
-    { id: 5, time: '03:00 PM', name: 'Sarah Gomez', service: 'Manicure & Pedicure', stylist: 'Lisa', status: 'Pending' },
-  ]
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Completed': return <span className="badge badge-success" style={{ background: '#E0E7FF', color: '#4338CA' }}>Completed</span>
-      case 'In Progress': return <span className="badge badge-warning">In Progress</span>
-      case 'Confirmed': return <span className="badge badge-success">Confirmed</span>
-      default: return <span className="badge badge-danger" style={{ background: '#F3F4F6', color: '#4B5563' }}>Pending</span>
-    }
+function Booking({row,onDone}) {
+  const {user}=useAuth(),catalog=useCatalog(),action=useAction()
+  const [service,setService]=useState(row?.service_id || ''),[employee,setEmployee]=useState(row?.employee_id || '')
+  const [customer,setCustomer]=useState(row?.customer_id || ''),[day,setDay]=useState(today()),[time,setTime]=useState('')
+  const item=catalog.items.find(i=>i.id===service)
+  const slots=useRecords(employee && day?'/slots':null,{serviceId:service,employeeId:employee,date:day})
+  function submit(e) {
+    e.preventDefault()
+    action.run(async()=>{
+      const body={serviceId:service,employeeId:employee,startsAt:time,...(customer?{customerId:customer}:{})}
+      try {
+        const {data}=await (row?api.put('/appointments/'+row.id,body):api.post('/appointments',body))
+        onDone(data.item.booking_reference)
+      }finally{slots.refresh();setTime('')}
+    })
   }
-
-  return (
-    <div className="card glass" style={{ minHeight: '600px' }}>
-      <div className="flex justify-between items-center mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <input type="date" className="input-field" defaultValue="2026-09-18" style={{ width: 'auto' }} />
-          <select className="input-field" style={{ width: 'auto' }}>
-            <option>All Stylists</option>
-            <option>Jane</option>
-            <option>Mark</option>
-            <option>Lisa</option>
-          </select>
-        </div>
-        <button className="btn btn-primary">
-          <Plus size={18} style={{ marginRight: '8px' }} />
-          New Appointment
-        </button>
-      </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Customer Name</th>
-              <th>Service</th>
-              <th>Stylist</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((apt) => (
-              <tr key={apt.id}>
-                <td className="font-bold">{apt.time}</td>
-                <td>{apt.name}</td>
-                <td className="text-muted">{apt.service}</td>
-                <td>{apt.stylist}</td>
-                <td>{getStatusBadge(apt.status)}</td>
-                <td>
-                  <button className="text-primary font-bold" style={{ background: 'none', border: 'none', marginRight: '1rem' }}>Edit</button>
-                  {apt.status === 'Confirmed' && <button className="text-success font-bold" style={{ background: 'none', border: 'none' }}>Check-in</button>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
+  return <form className="card" onSubmit={submit}><h2>{row?'Reschedule appointment':'Book an appointment'}</h2>
+    {action.feedback}{catalog.error && <Feedback tone="error">{catalog.error}</Feedback>}
+    <div className="account-fields">{user.role!=='customer' && !row && <CustomerChoice required value={customer} onChange={setCustomer}/>}
+    <Select label="Service" required value={service} onChange={e=>{setService(e.target.value);setEmployee('');setTime('')}}><option value="">Choose service</option>{catalog.items.filter(s=>s.duration_minutes && s.employees.length).map(s=><option key={s.id} value={s.id}>{s.name} · {s.duration_minutes} min</option>)}</Select>
+    <Select label="Stylist" required value={employee} onChange={e=>{setEmployee(e.target.value);setTime('')}}><option value="">Choose stylist</option>{item?.employees.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</Select>
+    <Field label="Date (Manila)" type="date" required min={today()} value={day} onChange={e=>{setDay(e.target.value);setTime('')}}/>
+    <Select label="Time (Manila)" required value={time} onChange={e=>setTime(e.target.value)}><option value="">{employee && !slots.loading && !slots.data?.items.length?'No slots available':'Choose time'}</option>{!slots.loading && slots.data?.items.map(s=><option key={s.start} value={s.start}>{new Date(s.start).toLocaleTimeString('en-PH',{timeZone:'Asia/Manila',hour:'numeric',minute:'2-digit'})}</option>)}</Select></div>
+    {item?.has_image && <img width="140" alt={item.name} src={'/api/images/'+item.id}/>}
+    {slots.error && <Feedback tone="error">{slots.error}</Feedback>}
+    <button className="btn btn-primary" disabled={action.pending || !time || slots.loading}>Confirm {row?'change':'booking'}</button></form>
+}
+export default function Appointments() {
+  const {user}=useAuth(),records=useRecords('/appointments'),action=useAction()
+  const [edit,setEdit]=useState(null),[notice,setNotice]=useState(''),[filter,setFilter]=useState(''),[day,setDay]=useState('')
+  const canBook=user.role==='customer' || user.permissions.includes('appointments.manage')
+  const transitions={pending:['confirmed','cancelled','no_show'],confirmed:['in_progress','cancelled','no_show'],in_progress:['completed']}
+  const labels={confirmed:'Confirm',in_progress:'Check in',completed:'Complete',cancelled:'Cancel',no_show:'No-show'}
+  const rows=(records.data?.appointments || []).filter(r=>(!filter || (r.customer_name+' '+r.employee_name+' '+r.status).toLowerCase().includes(filter.toLowerCase())) && (!day || new Date(Date.parse(r.starts_at)+28800000).toISOString().startsWith(day)))
+  return <div className="flex-col gap-4">{canBook && <div><button className="btn btn-primary" onClick={()=>{setEdit(edit?null:{});setNotice('')}}>{edit?'Close booking':'New appointment'}</button></div>}
+    {edit && <Booking key={edit.id || 'new'} row={edit.id?edit:null} onDone={ref=>{setEdit(null);setNotice('Booking saved · '+ref);records.refresh()}}/>}
+    {notice && <Feedback tone="success">{notice}</Feedback>}{action.feedback}
+    <section className="card"><h2>Schedule</h2><div className="management-toolbar"><Field label="Search schedule" value={filter} onChange={e=>setFilter(e.target.value)}/><Field label="Date" type="date" value={day} onChange={e=>setDay(e.target.value)}/></div>
+    {records.loading?<LoadingState/>:records.error?<Feedback tone="error">{records.error}</Feedback>:!rows.length?<p>No appointments found.</p>:<div className="table-container"><table><thead><tr><th>Service</th><th>When</th><th>Customer / stylist</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>{rows.map(r=><tr key={r.id}><td>{r.service_name}<br/><small>{r.booking_reference}</small></td><td>{dateTime(r.starts_at)}</td><td>{r.customer_name}<br/><small>{r.employee_name}</small></td><td>{r.status.replaceAll('_',' ')}</td>
+    <td>{canBook && ['pending','confirmed'].includes(r.status) && <button className="text-button" onClick={()=>setEdit(r)}>Reschedule</button>}{(transitions[r.status] || []).filter(s=>user.role!=='customer'||s==='cancelled').map(s=><button className="text-button" key={s} disabled={action.pending} onClick={()=>action.run(async()=>{await api.patch('/appointments/'+r.id,{status:s});records.refresh();return 'Appointment updated.'})}>{labels[s]}</button>)}</td></tr>)}</tbody></table></div>}</section></div>
 }

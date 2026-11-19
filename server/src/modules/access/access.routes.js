@@ -1,3 +1,8 @@
+import { financeRoutes } from '../finance/finance.routes.js'
+import { bookingRoutes } from '../operations/booking.js'
+import { salesRoutes } from '../operations/sales.js'
+import { stockRoutes } from '../operations/stock.js'
+import { imageRoutes } from '../operations/images.js'
 import { Router } from 'express'
 import { authenticate, requirePermission, trustedWrite } from '../../middleware/auth.js'
 import { HttpError } from '../../middleware/errors.js'
@@ -9,6 +14,11 @@ import { listSchema } from '../management/management.schemas.js'
 export function accessRoutes(service, database, config) {
   const router = Router()
   router.use(authenticate(service), trustedWrite(config))
+  financeRoutes(router,database.pool)
+  bookingRoutes(router,database.pool)
+  stockRoutes(router,database.pool)
+  salesRoutes(router,database.pool)
+  imageRoutes(router,database.pool,config)
   const schedule = requirePermission('appointments.manage', 'appointments.assigned', 'appointments.own')
   const scope = (user) => {
     if (user.permissions.includes('appointments.manage')) return [null, null]
@@ -16,7 +26,7 @@ export function accessRoutes(service, database, config) {
     if (user.permissions.includes('appointments.own') && user.customerId) return [null, user.customerId]
     throw new HttpError(403, 'FORBIDDEN', 'Appointment access is unavailable.')
   }
-  const appointmentSql = `SELECT a.id,a.booking_reference,a.starts_at,a.ends_at,a.status,
+  const appointmentSql = `SELECT a.id,a.service_id,a.employee_id,a.customer_id,a.booking_reference,a.starts_at,a.ends_at,a.status,
     a.service_name_snapshot AS service_name,c.display_name AS customer_name,e.display_name AS employee_name
     FROM salon.appointments a JOIN salon.customers c ON c.id=a.customer_id
     JOIN salon.employees e ON e.id=a.employee_id
@@ -56,18 +66,5 @@ export function accessRoutes(service, database, config) {
     res.json({ history: await history(id, page, pageSize), total: count, page, pageSize })
   })
   router.use('/payments', requirePermission('sales.manage'), paymentRoutes())
-  const futureModules = {
-    customers: 'customers.manage', services: 'services.manage', sales: 'sales.manage',
-    inventory: 'inventory.manage', payroll: 'payroll.manage', reports: 'reports.view',
-    settings: 'settings.manage', 'activity-logs': 'logs.view', dashboard: 'dashboard.view',
-  }
-  for (const [route, permission] of Object.entries(futureModules)) {
-    router.use('/' + route, requirePermission(permission), (req, res, next) => next(
-      new HttpError(501, 'WORKFLOW_NOT_IMPLEMENTED', 'This business workflow is planned for a later phase.'),
-    ))
-  }
-  router.all('/appointments{/:id}', schedule, (req, res, next) => next(
-    new HttpError(501, 'WORKFLOW_NOT_IMPLEMENTED', 'Booking changes are planned for Phase 5.'),
-  ))
   return router
 }

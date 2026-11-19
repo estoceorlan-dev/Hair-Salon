@@ -1,0 +1,14 @@
+.git/
+.local-runtime/
+.vercel/
+.env*
+**/.env*
+node_modules/
+server/node_modules/
+dist/
+server/data/
+backups/
+*.dump
+*.backup
+*.sql.gz
+*.docx

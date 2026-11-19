@@ -9,6 +9,7 @@ import { commandPool } from '../src/db/connection.js'
 import { migrate } from '../src/db/migrate.js'
 import { demoRoles, fixtureId, resetFixtureDatabase, seedFixtures } from '../src/db/demo-seed.js'
 import { createApp } from '../src/app.js'
+import { verifyOperations } from './operations-workflows.js'
 
 test('real PostgreSQL authentication, permissions, and ownership', async (t) => {
   const config = { ...loadEnvironment(), nodeEnv: 'test', jwtSecret: randomBytes(48).toString('base64url') }
@@ -80,7 +81,7 @@ test('real PostgreSQL authentication, permissions, and ownership', async (t) => 
       assert.deepEqual(ids, expected.rows.map((row) => row.id).sort())
     }
   })
-  await t.test('forbidden APIs deny non-managers; permitted future modules and payments remain disabled', async () => {
+  await t.test('role restrictions, provider controls and booking validation are enforced', async () => {
     for (const role of ['cashier', 'stylist', 'beautician', 'customer']) {
       for (const endpoint of ['/employee-accounts', '/settings', '/inventory', '/reports', '/payroll'])
         assert.equal((await request(endpoint, sessions[role])).status, 403)
@@ -92,8 +93,9 @@ test('real PostgreSQL authentication, permissions, and ownership', async (t) => 
     }
     assert.equal((await request('/payments/maya', { ...sessions.customer, method: 'POST' })).status, 403)
     assert.equal((await request('/settings', sessions.manager)).status, 200)
-    assert.equal((await request('/appointments', { ...sessions.customer, method: 'POST' })).status, 501)
+    assert.equal((await request('/appointments', { ...sessions.customer, method: 'POST' })).status, 422)
   })
+  await verifyOperations(t, { request, sessions, pool })
   let registered
   const registrationPassword = randomBytes(20).toString('base64url')
   await t.test('registration creates only a linked customer and stores a bcrypt hash; duplicate/privilege injection rejected', async () => {

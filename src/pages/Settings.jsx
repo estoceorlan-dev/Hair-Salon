@@ -80,7 +80,7 @@ export default function Settings() {
     try { await api({ url: path, method, data: body }); records.refresh(); setMessage({ tone: 'success', text: 'Settings saved.' }); return true }
     catch (err) { setMessage({ tone: 'error', text: apiErrorMessage(err) }); return false } finally { setPending(false) }
   }
-  return <div className="flex-col gap-4"><Feedback>Currency: PHP · Timezone: Asia/Manila. Undefined policies stay blank. Saved policies are configuration for later booking, receipt, tax and payroll workflows; no financial calculations or payments run here.</Feedback>
+  return <div className="flex-col gap-4">
     {message && <Feedback tone={message.tone}>{message.text}</Feedback>}
     {records.loading ? <LoadingState /> : records.error ? <><Feedback tone="error">{records.error}</Feedback><button className="btn btn-secondary" onClick={records.refresh}>Retry</button></> : <>
       <Hours hours={records.data.hours} save={save} pending={pending} />
@@ -88,7 +88,7 @@ export default function Settings() {
         <Field label="Closure date (Manila)" name="closedOn" type="date" required /><Field label="Closure reason" name="reason" required minLength={2} maxLength={500} /><button className="btn btn-primary" disabled={pending}>Add closure</button>
       </form>{records.data.closures.length === 0 ? <p className="text-muted">No closures recorded.</p> : <div className="table-container"><table><thead><tr><th>Date</th><th>Reason</th><th>Action</th></tr></thead><tbody>{records.data.closures.map((c) => <tr key={c.id}><td>{c.closed_on}</td><td>{c.reason}</td><td><button className="btn btn-secondary" disabled={pending} onClick={() => save('/settings/closures/' + c.id, 'delete', {})}>Remove</button></td></tr>)}</tbody></table></div>}</section>
       {records.data.settings.filter((s) => labels[s.key]).map((s) => <PolicyForm key={s.key + s.updated_at} setting={s} save={save} pending={pending} />)}
-      <section className="card"><h2>Payment methods</h2><p className="text-muted">All payment methods remain disabled pending separate implementation.</p><div className="flex gap-4">{records.data.payments.map((p) => <button className="btn btn-secondary" key={p.code} disabled>{p.label} · Disabled</button>)}</div></section>
+      <section className="card"><h2>Payment methods</h2><dl>{records.data.payments.map((p) => <div className="cart-row" key={p.code}><dt>{p.label}</dt><dd>{p.enabled ? 'Accepted' : 'Unavailable'}</dd></div>)}</dl></section>
     </>}
   </div>
 }

@@ -11,7 +11,7 @@ const missing = () => new HttpError(404, 'NOT_FOUND', 'Record not found.')
 const conflict = (message) => new HttpError(409, 'RECORD_CONFLICT', message)
 const serviceSelect = `SELECT s.*, ARRAY(SELECT es.employee_id FROM salon.employee_services es
   WHERE es.service_id=s.id ORDER BY es.employee_id) AS employee_ids FROM salon.services s`
-const publicCatalog = `SELECT s.id,s.code,s.name,s.category,s.price_cents,s.duration_minutes,s.is_demo,
+const publicCatalog = `SELECT s.id,s.code,s.name,s.category,s.price_cents,s.duration_minutes,(s.image_key IS NOT NULL) AS has_image,s.is_demo,
   COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e.id,'name',e.display_name) ORDER BY e.display_name)
   FROM salon.employee_services es JOIN salon.employees e ON e.id=es.employee_id
   WHERE es.service_id=s.id AND e.is_active AND e.job_kind IN ('stylist','beautician')), '[]'::jsonb) AS employees
@@ -117,8 +117,8 @@ export function managementRoutes(auth, database, config) {
       const sql = id ? `UPDATE salon.services SET code=$1,name=$2,category=$3,price_cents=$4,duration_minutes=$5,is_active=$6,updated_at=now() WHERE id=$7 RETURNING *`
         : `INSERT INTO salon.services(code,name,category,price_cents,duration_minutes,is_active) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`
       const row = (await client.query(sql, id ? [...values, id] : values)).rows[0]
-      await client.query('DELETE FROM salon.employee_services WHERE service_id=$1', [row.id])
-      await client.query('INSERT INTO salon.employee_services(service_id,employee_id) SELECT $1,unnest($2::uuid[])', [row.id, d.employeeIds])
+      await client.query('DELETE FROM salon.employee_services WHERE service_id=$1 AND NOT(employee_id=ANY($2::uuid[]))', [row.id,d.employeeIds])
+      await client.query('INSERT INTO salon.employee_services(service_id,employee_id) SELECT $1,unnest($2::uuid[]) ON CONFLICT DO NOTHING', [row.id, d.employeeIds])
       return { ...row, employee_ids: d.employeeIds, audit: { before, after: d } }
     })
   }
