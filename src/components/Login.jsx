@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import ThemeToggle from './ThemeToggle'
+import { Eye, EyeOff } from 'lucide-react'
 import { Feedback } from './ui/Feedback'
 import { homeFor, useAuth } from '../auth/AuthContext'
 import { apiErrorMessage } from '../api/client'
@@ -43,7 +44,7 @@ export default function Login() {
     </div>
     <section className="entry-panel" aria-labelledby="entry-heading">
       <div className="entry-content">
-        <h1 id="entry-heading">{registering ? <>Create an <em>account.</em></> : <>Welcome <em>back.</em></>}</h1>
+        <header className="entry-header"><h1 id="entry-heading">{registering ? <>Create an <em>account.</em></> : <>Welcome <em>back.</em></>}</h1><ThemeToggle /></header>
         <p className="entry-subtitle">{registering ? 'Book appointments and see your visit history.' : 'Sign in to your salon account.'}</p>
         {auth.notice && <Feedback>{auth.notice}</Feedback>}
         {(error || auth.error) && <Feedback tone="error">{error || auth.error}</Feedback>}
@@ -58,7 +59,7 @@ export default function Login() {
               <button type="button" onClick={() => setVisible(!visible)} aria-label={visible ? 'Hide password' : 'Show password'}>{visible ? <EyeOff size={18} /> : <Eye size={18} />}</button>
             </div>
           </div>
-          <button className="btn btn-primary entry-submit" disabled={pending}>{pending ? 'Please wait…' : registering ? 'Create account' : 'Sign in'}<ArrowRight size={18} /></button>
+          <button className="btn btn-primary entry-submit" disabled={pending}>{pending ? 'Please wait…' : registering ? 'Create account' : 'Sign in'}</button>
         </form>
         <p className="entry-switch">{registering ? 'Already have an account?' : 'New to the salon?'} <button type="button" disabled={pending} onClick={switchForm}>{registering ? 'Sign in' : 'Create an account'}</button></p>
       </div>

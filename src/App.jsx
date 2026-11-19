@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { LogOut } from 'lucide-react'
 import { homeFor, useAuth } from './auth/AuthContext'
 import { apiErrorMessage } from './api/client'
+import ThemeToggle from './components/ThemeToggle'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Appointments from './components/Appointments'
@@ -50,12 +51,12 @@ function EmployeeLayout() {
     try { await auth.logout() } catch (err) { setError(apiErrorMessage(err)) } finally { setPending(false) }
   }
   return <div className="app-container"><Sidebar /><main className="main-content">
-    <div className="top-header"><div><h1 className="text-2xl font-bold">{title}</h1>
-      </div><div className="flex items-center gap-4">
+    <header className="top-header"><h1>{title}</h1>
+      <div className="header-actions"><ThemeToggle />
       <div className="profile-avatar">{auth.user.displayName.split(' ').map((s) => s[0]).slice(0, 2).join('')}</div>
-      <div><p className="text-sm font-bold">{auth.user.displayName}</p><p className="text-muted text-sm">{auth.user.roleName}</p></div>
+      <div className="header-identity"><p className="text-sm font-bold">{auth.user.displayName}</p><p className="text-muted text-sm">{auth.user.roleName}</p></div>
       <button className="btn btn-secondary" aria-label="Sign out" disabled={pending} onClick={logout}><LogOut size={16} /></button>
-    </div></div>{error && <Feedback tone="error">{error}</Feedback>}<Outlet />
+    </div></header>{error && <Feedback tone="error">{error}</Feedback>}<Outlet />
   </main></div>
 }
 function EmployeeHome() { return <Navigate to={homeFor(useAuth().user)} replace /> }

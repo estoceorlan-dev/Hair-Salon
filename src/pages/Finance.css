@@ -4,8 +4,10 @@
 .finance-head a {display:inline-flex;align-items:center;gap:.2rem}
 .finance-head {margin-bottom:1rem}
 .finance-metrics {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:1rem}
-.finance-metric {position:relative;overflow:hidden}
-.finance-metric svg {color:var(--primary);margin-bottom:.85rem}
+.finance-metric {display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;align-items:center;gap:.7rem}
+.finance-metric svg {grid-column:2;grid-row:1;color:var(--primary)}
+.finance-metric p {grid-column:1;grid-row:1}
+.finance-metric strong {grid-column:1 / -1}
 .finance-metric p,.finance-list small {color:var(--text-muted);font-size:.875rem}
 .finance-metric strong {font-size:clamp(1.45rem,2.7vw,2.15rem);font-weight:600;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
 .finance-list {list-style:none}

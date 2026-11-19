@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { homeFor, useAuth } from '../auth/AuthContext'
 import { apiErrorMessage } from '../api/client'
+import ThemeToggle from '../components/ThemeToggle'
 import { Feedback } from '../components/ui/Feedback'
 
 export default function Account() {
@@ -19,7 +20,8 @@ export default function Account() {
     finally { setPending(false) }
   }
   return <div className="preview-entry"><section className="card account-card">
-    <Link to={homeFor(auth.user)}>Back to your workspace</Link><h1 className="mt-4">My Account</h1>
+    <header className="account-header"><Link to={homeFor(auth.user)}>Back to workspace</Link><ThemeToggle /></header>
+    <h1>My account</h1>
     <p>{auth.user.displayName} · {auth.user.roleName}</p><p className="text-muted">{auth.user.email}</p>
     <h2 className="mt-4">Change password</h2><Feedback>Changing your password ends all of your sessions. Sign in again afterward.</Feedback>
     {error && <Feedback tone="error">{error}</Feedback>}

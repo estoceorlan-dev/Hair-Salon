@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
-import { useLocation } from 'react-router'
 
 const storageKey = 'romel-theme'
 
@@ -13,7 +12,6 @@ function savedTheme() {
 }
 
 export default function ThemeToggle() {
-  const { pathname } = useLocation()
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light')
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -38,8 +36,7 @@ export default function ThemeToggle() {
     try { localStorage.setItem(storageKey, next) } catch { /* Keep this session's selection. */ }
   }
   const label = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
-  const position = pathname.startsWith('/app') ? 'workspace' : pathname === '/' ? 'entry' : 'general'
-  return <button className={'theme-switch theme-' + position} type="button" onClick={toggle} title={label} aria-label={label}>
+  return <button className="theme-switch" type="button" onClick={toggle} title={label} aria-label={label}>
     <span className="theme-thumb" aria-hidden="true" /><Sun size={15} aria-hidden="true" /><Moon size={15} aria-hidden="true" />
   </button>
 }
